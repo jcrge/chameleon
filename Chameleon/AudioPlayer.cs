@@ -16,7 +16,7 @@ namespace Chameleon
 {
     public class AudioPlayer : LinearLayout, IDisposable
     {
-        private static readonly int POS_SHORT_JUMP_SECONDS = 1;
+        private static readonly int POS_SHORT_JUMP_SECONDS = 2;
         private static readonly int POS_LONG_JUMP_SECONDS = 5;
 
         public Button PlayPauseButton;
@@ -112,17 +112,7 @@ namespace Chameleon
             }
             else
             {
-                // La posición cambia ligeramente durante la pausa. El efecto de volver a
-                // position es que se repiten las últimas décimas o milésimas de segundo
-                // reproducidas (el tiempo exacto depende de la latencia presente). Dependiendo
-                // de cuánto tiempo sea, puede ser más o menos notable. En cualquier caso es
-                // muy preferible a no modificar la posición, ya que entonces hay un pequeño
-                // tramo que no se llega a escuchar en ningún momento y eso, para el uso que
-                // se dará a este reproductor, es inaceptable.
-                double position = Player.CurrentPosition;
                 Player.Pause();
-                Player.Seek(position);
-
                 PlayPauseButton.Text = Resources.GetText(Resource.String.action_play);
             }
         }
