@@ -7,16 +7,20 @@ using AndroidX.AppCompat.Widget;
 using AndroidX.AppCompat.App;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.Snackbar;
+using Xamarin.Essentials;
+using System.Threading.Tasks;
 
 namespace Chameleon
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        protected override void OnCreate(Bundle savedInstanceState)
+        AudioPlayer audioPlayer;
+
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
@@ -24,6 +28,26 @@ namespace Chameleon
 
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
+
+            audioPlayer = FindViewById<AudioPlayer>(Resource.Id.audio_player);
+            audioPlayer.AudioStream = await GetTestStream();
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            audioPlayer.Dispose();
+        }
+
+        async Task<System.IO.Stream> GetTestStream()
+        {
+            FileResult result = await FilePicker.PickAsync(new PickOptions
+            {
+                PickerTitle = "Testing FilePicker"
+            });
+            System.IO.Stream stream = await result.OpenReadAsync();
+
+            return stream;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
