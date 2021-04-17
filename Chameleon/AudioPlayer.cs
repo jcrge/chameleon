@@ -19,7 +19,6 @@ namespace Chameleon
         private static readonly int POS_SHORT_JUMP_SECONDS = 1;
         private static readonly int POS_LONG_JUMP_SECONDS = 5;
 
-        public TextView PositionText;
         public Button PlayPauseButton;
         public Button RewindButton;
         public Button FastForwardButton;
@@ -79,7 +78,6 @@ namespace Chameleon
                 ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
             AddView(view);
 
-            PositionText = view.FindViewById<TextView>(Resource.Id.position_text);
             PlayPauseButton = view.FindViewById<Button>(Resource.Id.play_pause_button);
             RewindButton = view.FindViewById<Button>(Resource.Id.rewind_button);
             FastForwardButton = view.FindViewById<Button>(Resource.Id.fastforward_button);
