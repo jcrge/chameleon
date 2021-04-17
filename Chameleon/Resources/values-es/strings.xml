@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Camaleón</string>
+    <string name="action_settings">Configuración</string>
+    <string name="action_play">Reproducir</string>
+    <string name="action_pause">Pausar</string>
+    <string name="action_loop">En bucle</string>
+</resources>

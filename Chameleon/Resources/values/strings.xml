@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Chameleon</string>
     <string name="action_settings">Settings</string>
+    <string name="action_play">Play</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_rewind" translatable="false">&lt;&lt;</string>
+    <string name="action_fastforward" translatable="false">&gt;&gt;</string>
+    <string name="action_loop">Loop</string>
 </resources>
