@@ -15,3 +15,6 @@ Este es el repositorio de mi Proyecto de Fin de Ciclo.
   - Se implementa IDisposable para liberar el SimpleAudioPlayer y el flujo de audio. Es importante liberar bien los recursos, ya que se trabajará con muchos archivos de audio y reproductores y muchos tendrán una vida muy corta.
   - Se gestionan los eventos y establecen valores sensatos para saltar a diferentes puntos del audio de forma óptima.
     - Los saltos no son demasiado cortos como para llegar rápido a un punto específico ni demasiado largos como para hacer tedioso escuchar una misma palabra o frase corta repetidas veces. Se implementan pulsaciones cortas y largas para cumplir satisfactoriamente ambas demandas.
+- Se crea la grabadora, una vista que extiende Button.
+- Se elimina la dependencia en Xam.Plugin.SimpleAudioPlayer a favor de utilizar directamente MediaPlayer, ya que la grabadora utiliza MediaRecorder y SimpleMediaPlayer no aporta nada especial a MediaPlayer para aplicaciones Xamarin.Android sin Xamarin.Forms.
+- Se modifica la actividad temporal de prueba para conectar una grabadora con el reproductor, de modo que las grabaciones son reproducibles.
