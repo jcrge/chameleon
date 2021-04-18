@@ -30,7 +30,7 @@ namespace Chameleon
             fab.Click += FabOnClick;
 
             audioPlayer = FindViewById<AudioPlayer>(Resource.Id.audio_player);
-            audioPlayer.AudioStream = await GetTestStream();
+            audioPlayer.AudioSource = await GetTestStream();
         }
 
         protected override void OnDestroy()
@@ -39,15 +39,14 @@ namespace Chameleon
             audioPlayer.Dispose();
         }
 
-        async Task<System.IO.Stream> GetTestStream()
+        async Task<string> GetTestStream()
         {
             FileResult result = await FilePicker.PickAsync(new PickOptions
             {
                 PickerTitle = "Testing FilePicker"
             });
-            System.IO.Stream stream = await result.OpenReadAsync();
 
-            return stream;
+            return result.FullPath;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

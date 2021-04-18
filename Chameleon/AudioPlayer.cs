@@ -10,28 +10,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Plugin.SimpleAudioPlayer;
+using Android.Media;
 
 namespace Chameleon
 {
     public class AudioPlayer : LinearLayout, IDisposable
     {
-        private static readonly int POS_SHORT_JUMP_SECONDS = 2;
-        private static readonly int POS_LONG_JUMP_SECONDS = 5;
+        private static readonly int POS_SHORT_JUMP_SECONDS = 2000;
+        private static readonly int POS_LONG_JUMP_SECONDS = 5000;
 
         public Button PlayPauseButton;
         public Button RewindButton;
         public Button FastForwardButton;
         public CheckBox LoopCheckBox;
 
-        private ISimpleAudioPlayer Player;
+        private MediaPlayer Player;
 
         // IMPORTANTE: Es esta clase la que se encarga de liberar AudioStream al recibir
         // un valor nuevo para el campo y en Dispose.
-        private Stream audioStream;
-        public Stream AudioStream
+        private string audioSource;
+        public string AudioSource
         {
-            get => audioStream;
+            get => audioSource;
             set
             {
                 PrepareToStart();
@@ -40,15 +40,12 @@ namespace Chameleon
                 RewindButton.Enabled = value != null;
                 FastForwardButton.Enabled = value != null;
 
-                if (audioStream != null)
+                audioSource = value;
+                if (audioSource != null)
                 {
-                    audioStream.Dispose();
-                }
-
-                audioStream = value;
-                if (value != null)
-                {
-                    Player.Load(value);
+                    Player.Reset();
+                    Player.SetDataSource(audioSource);
+                    Player.Prepare();
                 }
             }
         }
@@ -83,31 +80,31 @@ namespace Chameleon
             FastForwardButton = view.FindViewById<Button>(Resource.Id.fastforward_button);
             LoopCheckBox = view.FindViewById<CheckBox>(Resource.Id.loop_checkbox);
 
-            Player = CrossSimpleAudioPlayer.CreateSimpleAudioPlayer();
-            Player.PlaybackEnded += (s, e) =>
+            Player = new MediaPlayer();
+            Player.Completion += (s, e) =>
             {
-                if (!Player.Loop)
+                if (!Player.Looping)
                 {
                     PrepareToStart();
                 }
             };
 
             PlayPauseButton.Click += PlayPauseClicked;
-            RewindButton.Click += (s, e) => Player.Seek(Player.CurrentPosition - POS_SHORT_JUMP_SECONDS);
-            RewindButton.LongClick += (s, e) => Player.Seek(Player.CurrentPosition - POS_LONG_JUMP_SECONDS);
-            FastForwardButton.Click += (s, e) => Player.Seek(Player.CurrentPosition + POS_SHORT_JUMP_SECONDS);
-            FastForwardButton.LongClick += (s, e) => Player.Seek(Player.CurrentPosition + POS_LONG_JUMP_SECONDS);
-            LoopCheckBox.CheckedChange += (s, e) => Player.Loop = LoopCheckBox.Checked;
+            RewindButton.Click += (s, e) => Player.SeekTo(Player.CurrentPosition - POS_SHORT_JUMP_SECONDS);
+            RewindButton.LongClick += (s, e) => Player.SeekTo(Player.CurrentPosition - POS_LONG_JUMP_SECONDS);
+            FastForwardButton.Click += (s, e) => Player.SeekTo(Player.CurrentPosition + POS_SHORT_JUMP_SECONDS);
+            FastForwardButton.LongClick += (s, e) => Player.SeekTo(Player.CurrentPosition + POS_LONG_JUMP_SECONDS);
+            LoopCheckBox.CheckedChange += (s, e) => Player.Looping = LoopCheckBox.Checked;
 
-            // AudioStream se debe establecer a null explícitamente para desactivar la interfaz.
-            AudioStream = null;
+            // AudioSource se debe establecer a null explícitamente para desactivar la interfaz.
+            AudioSource = null;
         }
 
         private void PlayPauseClicked(object sender, EventArgs e)
         {
             if (!Player.IsPlaying)
             {
-                Player.Play();
+                Player.Start();
                 PlayPauseButton.Text = Resources.GetText(Resource.String.action_pause);
             }
             else
@@ -119,7 +116,8 @@ namespace Chameleon
 
         private void PrepareToStart()
         {
-            Player.Stop();
+            Player.Pause();
+            Player.SeekTo(0);
             PlayPauseButton.Text = Resources.GetText(Resource.String.action_play);
         }
 
@@ -138,8 +136,7 @@ namespace Chameleon
                 {
                     if (disposing)
                     {
-                        audioStream?.Dispose();
-                        Player?.Dispose();
+                        Player?.Release();
                     }
                 }
                 finally
