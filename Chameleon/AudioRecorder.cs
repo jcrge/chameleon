@@ -31,14 +31,6 @@ namespace Chameleon
 
                 audioDestination = value;
                 Enabled = audioDestination != null;
-                if (audioDestination != null)
-                {
-                    Recorder.SetAudioSource(AudioSource.Mic);
-                    Recorder.SetOutputFormat(OutputFormat.ThreeGpp);
-                    Recorder.SetAudioEncoder(AudioEncoder.AmrNb);
-                    Recorder.SetOutputFile(audioDestination);
-                    Recorder.Prepare();
-                }
             }
         }
 
@@ -77,6 +69,15 @@ namespace Chameleon
         {
             if (!Recording)
             {
+                Recorder.Reset();
+                Recorder.SetAudioSource(AudioSource.Mic);
+                Recorder.SetOutputFormat(OutputFormat.Mpeg4);
+                Recorder.SetAudioEncoder(AudioEncoder.Aac);
+                Recorder.SetAudioEncodingBitRate(128000);
+                Recorder.SetAudioSamplingRate(96000);
+                Recorder.SetOutputFile(audioDestination);
+                Recorder.Prepare();
+
                 Text = Resources.GetText(Resource.String.action_stop_recording);
                 Recording = true;
                 Recorder.Start();

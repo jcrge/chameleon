@@ -41,7 +41,7 @@ namespace Chameleon
                 Manifest.Permission.RecordAudio
             }, 1);
 
-            audioRecorder.AudioDestination = "/storage/emulated/0/Download/testfile2.3gp";
+            audioRecorder.AudioDestination = "/storage/emulated/0/Download/testfile2.out";
             audioRecorder.RecordingReceived += filePath => audioPlayer.AudioSource = filePath;
         }
 
