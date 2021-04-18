@@ -46,6 +46,7 @@ namespace Chameleon
                     Player.Reset();
                     Player.SetDataSource(audioSource);
                     Player.Prepare();
+                    Player.Looping = LoopCheckBox.Checked;
                 }
             }
         }
