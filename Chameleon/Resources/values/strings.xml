@@ -6,4 +6,6 @@
     <string name="action_rewind" translatable="false">&lt;&lt;</string>
     <string name="action_fastforward" translatable="false">&gt;&gt;</string>
     <string name="action_loop">Loop</string>
+    <string name="action_start_recording">Record</string>
+    <string name="action_stop_recording">Finish</string>
 </resources>

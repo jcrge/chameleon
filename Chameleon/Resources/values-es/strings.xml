@@ -4,4 +4,6 @@
     <string name="action_play">Reproducir</string>
     <string name="action_pause">Pausar</string>
     <string name="action_loop">En bucle</string>
+    <string name="action_start_recording">Grabar</string>
+    <string name="action_stop_recording">Finalizar</string>
 </resources>

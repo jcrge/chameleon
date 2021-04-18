@@ -15,4 +15,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <chameleon.AudioRecorder
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/audio_player"
+        android:layout_alignParentLeft="true"
+        android:id="@+id/audio_recorder" />
+
 </RelativeLayout>

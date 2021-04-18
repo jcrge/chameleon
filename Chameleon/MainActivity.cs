@@ -9,6 +9,8 @@ using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.Snackbar;
 using Xamarin.Essentials;
 using System.Threading.Tasks;
+using AndroidX.Core.App;
+using Android;
 
 namespace Chameleon
 {
@@ -16,6 +18,7 @@ namespace Chameleon
     public class MainActivity : AppCompatActivity
     {
         AudioPlayer audioPlayer;
+        AudioRecorder audioRecorder;
 
         protected override async void OnCreate(Bundle savedInstanceState)
         {
@@ -30,7 +33,16 @@ namespace Chameleon
             fab.Click += FabOnClick;
 
             audioPlayer = FindViewById<AudioPlayer>(Resource.Id.audio_player);
-            audioPlayer.AudioSource = await GetTestStream();
+            audioRecorder = FindViewById<AudioRecorder>(Resource.Id.audio_recorder);
+            //audioPlayer.AudioSource = await GetTestStream();
+
+            ActivityCompat.RequestPermissions(this, new string[] { 
+                Manifest.Permission.WriteExternalStorage,
+                Manifest.Permission.RecordAudio
+            }, 1);
+
+            audioRecorder.AudioDestination = "/storage/emulated/0/Download/testfile2.3gp";
+            audioRecorder.RecordingReceived += filePath => audioPlayer.AudioSource = filePath;
         }
 
         protected override void OnDestroy()
