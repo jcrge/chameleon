@@ -11,6 +11,7 @@ using Xamarin.Essentials;
 using System.Threading.Tasks;
 using AndroidX.Core.App;
 using Android;
+using System.IO;
 
 namespace Chameleon
 {
@@ -43,6 +44,11 @@ namespace Chameleon
 
             audioRecorder.AudioDestination = "/storage/emulated/0/Download/testfile2.out";
             audioRecorder.RecordingReceived += filePath => audioPlayer.AudioSource = filePath;
+
+            //StagingArea stagingArea = new StagingArea(FileSystem.AppDataDirectory);
+            StagingArea stagingArea = new StagingArea("/storage/emulated/0/Download/test/");
+            stagingArea.UncompressProject("/storage/emulated/0/Download/compressed.chm");
+            stagingArea.Load();
         }
 
         protected override void OnDestroy()
