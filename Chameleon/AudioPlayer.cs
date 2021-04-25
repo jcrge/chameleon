@@ -26,8 +26,6 @@ namespace Chameleon
 
         private MediaPlayer Player;
 
-        // IMPORTANTE: Es esta clase la que se encarga de liberar AudioStream al recibir
-        // un valor nuevo para el campo y en Dispose.
         private string audioSource;
         public string AudioSource
         {
