@@ -16,6 +16,26 @@ namespace Chameleon
 {
     class WAVTools
     {
+        public static bool IsPcmWav(string path)
+        {
+            try
+            {
+                using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open))
+                {
+                    (int payloadSize, bool isLittleEndian) = ReadRIFFHeader(mmf);
+                    (int fmtOffset, int fmtSectionSize) = FindSectionOffset(mmf, "fmt ", payloadSize, isLittleEndian);
+                    (int dataOffset, int dataSectionSize) = FindSectionOffset(mmf, "data", payloadSize, isLittleEndian);
+                    ReadPcmFmtSection(mmf, fmtOffset, fmtSectionSize, isLittleEndian);
+                }
+
+                return true;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+
         public static void Split(string sourcePath, int midpointMsec, string leftDestPath, string rightDestPath)
         {
             if (midpointMsec <= 0)
