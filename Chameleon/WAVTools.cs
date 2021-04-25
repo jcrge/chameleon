@@ -73,30 +73,46 @@ namespace Chameleon
                 {
                     using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(leftDestPath)))
                     {
-                        WriteWAV(bw,
-                            sampleRate, numChannels, bytesPerSample,
-                            samplesAccessor, 0, leftDataByteCount);
+                        WritePcmWavRIFFHeader(bw, leftDataByteCount);
+                        WritePcmWavFmtSection(bw, sampleRate, numChannels, bytesPerSample);
+                        WriteDataHeader(bw, leftDataByteCount);
+                        CopySamples(bw, samplesAccessor, 0, leftDataByteCount);
+
+                        if (leftDataByteCount % 2 == 1)
+                        {
+                            bw.Write((byte)0);
+                        }
                         bw.Flush();
                     }
 
                     using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(rightDestPath)))
                     {
-                        WriteWAV(bw,
-                            sampleRate, numChannels, bytesPerSample,
-                            samplesAccessor, leftDataByteCount, rightDataByteCount);
+                        WritePcmWavRIFFHeader(bw, rightDataByteCount);
+                        WritePcmWavFmtSection(bw, sampleRate, numChannels, bytesPerSample);
+                        WriteDataHeader(bw, rightDataByteCount);
+                        CopySamples(bw, samplesAccessor, leftDataByteCount, rightDataByteCount);
+
+                        if (rightDataByteCount % 2 == 1)
+                        {
+                            bw.Write((byte)0);
+                        }
                         bw.Flush();
                     }
                 }
             }
         }
 
-        private static void WriteWAV(BinaryWriter bw,
-            int sampleRate, short numChannels, short bytesPerSample,
-            MemoryMappedViewAccessor samplesAccessor, int samplesOffset, int samplesLength)
+        private static void WritePcmWavRIFFHeader(BinaryWriter bw, int samplesLength)
         {
             bw.Write("RIFF".ToCharArray());
             bw.Write(40 + samplesLength + (samplesLength % 2));
-            bw.Write("WAVEfmt ".ToCharArray());
+            bw.Write("WAVE".ToCharArray());
+        }
+
+        private static void WritePcmWavFmtSection(
+            BinaryWriter bw, int sampleRate, short numChannels, short bytesPerSample)
+        {
+            bw.Write("fmt ".ToCharArray());
             bw.Write(16);
             bw.Write(AUDIO_FORMAT_PCM);
             bw.Write(numChannels);
@@ -104,9 +120,17 @@ namespace Chameleon
             bw.Write(sampleRate * numChannels * bytesPerSample);
             bw.Write((short)(numChannels * bytesPerSample));
             bw.Write((short)(bytesPerSample * 8));
-            bw.Write("data".ToCharArray());
-            bw.Write(samplesLength);
+        }
 
+        private static void WriteDataHeader(BinaryWriter bw, int payloadSize)
+        {
+            bw.Write("data".ToCharArray());
+            bw.Write(payloadSize);
+        }
+
+        private static void CopySamples(
+            BinaryWriter bw, MemoryMappedViewAccessor samplesAccessor, int samplesOffset, int samplesLength)
+        {
             byte[] buffer = new byte[1024];
             int bytesLeft = samplesLength;
             while (bytesLeft > 0)
@@ -117,11 +141,6 @@ namespace Chameleon
                 samplesOffset += bytesToRead;
 
                 bw.Write(buffer, 0, bytesToRead);
-            }
-
-            if (samplesLength % 2 == 1)
-            {
-                bw.Write((byte)0);
             }
         }
 
