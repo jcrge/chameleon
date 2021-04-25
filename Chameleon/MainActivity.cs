@@ -50,7 +50,7 @@ namespace Chameleon
             stagingArea.PrepareNewProject("/storage/emulated/0/Download/compressed.chm");
             stagingArea.Load();
 
-            WAVTools.Split("/storage/emulated/0/Download/yy.wav", 6000, "/storage/emulated/0/Download/out1.wav", "/storage/emulated/0/Download/out2.wav");
+            WAVEdition.Split("/storage/emulated/0/Download/yy.wav", 6000, "/storage/emulated/0/Download/out1.wav", "/storage/emulated/0/Download/out2.wav");
             Console.WriteLine("debug");
         }
 

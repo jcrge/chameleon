@@ -14,21 +14,82 @@ using System.Text;
 
 namespace Chameleon
 {
-    class WAVTools
+    // Vista sobre un archivo WAV en formato PCM. Permite procesar un archivo para acceder a
+    // sus propiedades, como el número de canales (mono o estéreo) o una vista sobre los datos
+    // de sus muestras.
+    class PcmWavView : IDisposable
     {
+        public bool IsLittleEndian { get; }
+        public int SampleRate { get; }
+        public short NumChannels { get; }
+        public short BytesPerSample { get; }
+        public int SampleDataSize { get; }
+        public MemoryMappedViewAccessor SampleData { get; }
+
+        private MemoryMappedFile Mmf;
+
+        public PcmWavView(string path)
+        {
+            Mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open);
+
+            (int payloadSize, bool isLittleEndian) = WAVIO.ReadRIFFHeader(Mmf);
+            IsLittleEndian = isLittleEndian;
+
+            (int fmtOffset, int fmtSectionSize) = WAVIO.FindSectionOffset(Mmf, "fmt ", payloadSize, IsLittleEndian);
+            (int dataOffset, int dataSectionSize) = WAVIO.FindSectionOffset(Mmf, "data", payloadSize, IsLittleEndian);
+            SampleDataSize = dataSectionSize - 8;
+
+            (SampleRate, NumChannels, BytesPerSample) =
+                WAVIO.ReadPcmFmtSection(Mmf, fmtOffset, fmtSectionSize, IsLittleEndian);
+
+            SampleData = Mmf.CreateViewAccessor(dataOffset + 8, dataSectionSize - 8);
+        }
+
+        private bool disposed = false;
+
+        ~PcmWavView()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        Mmf.Dispose();
+                        SampleData.Dispose();
+                    }
+                }
+                finally
+                {
+                    disposed = true;
+                }
+            }
+        }
+    }
+
+    // Métodos para realizar operaciones sobre archivos WAV, como juntarlos o dividirlos.
+    class WAVEdition
+    {
+        // Devuelve true si y solo si `path` es una ruta válida a un archivo legible WAV en formato PCM.
         public static bool IsPcmWav(string path)
         {
             try
             {
-                using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open))
+                using (PcmWavView f = new PcmWavView(path))
                 {
-                    (int payloadSize, bool isLittleEndian) = ReadRIFFHeader(mmf);
-                    (int fmtOffset, int fmtSectionSize) = FindSectionOffset(mmf, "fmt ", payloadSize, isLittleEndian);
-                    (int dataOffset, int dataSectionSize) = FindSectionOffset(mmf, "data", payloadSize, isLittleEndian);
-                    ReadPcmFmtSection(mmf, fmtOffset, fmtSectionSize, isLittleEndian);
+                    return true;
                 }
-
-                return true;
             }
             catch (IOException)
             {
@@ -36,6 +97,10 @@ namespace Chameleon
             }
         }
 
+        // Divide un archivo WAV en formato PCM en la ruta `sourcePath` en dos audios más cortos.
+        // `midpointMsec` especifica el punto de ruptura en el audio en milisegundos. El segmento
+        // previo al punto de ruptura se guarda en `leftDestPath`, y el segmento posterior, en
+        // `rightDestPath`.
         public static void Split(string sourcePath, int midpointMsec, string leftDestPath, string rightDestPath)
         {
             if (midpointMsec <= 0)
@@ -44,24 +109,12 @@ namespace Chameleon
                     $"The given midpointMsec value of {midpointMsec} is too low.");
             }
 
-            // Utilizamos mapeados de memoria porque necesitamos acceso aleatorio al archivo, ya que la
-            // sección "fmt ", que indica la información necesaria para saber cuántos bytes de la sección
-            // "data" se deben corresponder con cada archivo de destino, puede aparecer después de esta
-            // última sección mencionada y los archivos con los que contamos trabajar pueden ser demasiado
-            // grandes como para recurrir a búferes (potencialmente horas de datos WAV PCM no comprimidos). 
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateFromFile(sourcePath, FileMode.Open))
+            using (PcmWavView f = new PcmWavView(sourcePath))
             {
-                (int payloadSize, bool isLittleEndian) = ReadRIFFHeader(mmf);
-                (int fmtOffset, int fmtSectionSize) = FindSectionOffset(mmf, "fmt ", payloadSize, isLittleEndian);
-                (int dataOffset, int dataSectionSize) = FindSectionOffset(mmf, "data", payloadSize, isLittleEndian);
-
-                (int sampleRate, short numChannels, short bytesPerSample) =
-                    ReadPcmFmtSection(mmf, fmtOffset, fmtSectionSize, isLittleEndian);
-
                 // Número de bytes iniciales de la carga de "data" que deben conformar la carga total de la
                 // sección "data" de leftDestPath.
-                int leftDataByteCount = (int)((long)bytesPerSample * numChannels * sampleRate * midpointMsec / 1000);
-                int rightDataByteCount = dataSectionSize - 8 - leftDataByteCount;
+                int leftDataByteCount = (int)((long)f.BytesPerSample * f.NumChannels * f.SampleRate * midpointMsec / 1000);
+                int rightDataByteCount = f.SampleDataSize - leftDataByteCount;
 
                 if (rightDataByteCount <= 0)
                 {
@@ -69,47 +122,50 @@ namespace Chameleon
                         $"The given midpointMsec value of {midpointMsec} is too high.");
                 }
 
-                using (var samplesAccessor = mmf.CreateViewAccessor(dataOffset + 8, dataSectionSize - 8))
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(leftDestPath)))
                 {
-                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(leftDestPath)))
+                    WAVIO.WritePcmWavRIFFHeader(bw, leftDataByteCount);
+                    WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
+                    WAVIO.WriteDataHeader(bw, leftDataByteCount);
+                    WAVIO.CopySamples(bw, f.SampleData, 0, leftDataByteCount);
+
+                    if (leftDataByteCount % 2 == 1)
                     {
-                        WritePcmWavRIFFHeader(bw, leftDataByteCount);
-                        WritePcmWavFmtSection(bw, sampleRate, numChannels, bytesPerSample);
-                        WriteDataHeader(bw, leftDataByteCount);
-                        CopySamples(bw, samplesAccessor, 0, leftDataByteCount);
-
-                        if (leftDataByteCount % 2 == 1)
-                        {
-                            bw.Write((byte)0);
-                        }
-                        bw.Flush();
+                        bw.Write((byte)0);
                     }
+                    bw.Flush();
+                }
 
-                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(rightDestPath)))
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(rightDestPath)))
+                {
+                    WAVIO.WritePcmWavRIFFHeader(bw, rightDataByteCount);
+                    WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
+                    WAVIO.WriteDataHeader(bw, rightDataByteCount);
+                    WAVIO.CopySamples(bw, f.SampleData, leftDataByteCount, rightDataByteCount);
+
+                    if (rightDataByteCount % 2 == 1)
                     {
-                        WritePcmWavRIFFHeader(bw, rightDataByteCount);
-                        WritePcmWavFmtSection(bw, sampleRate, numChannels, bytesPerSample);
-                        WriteDataHeader(bw, rightDataByteCount);
-                        CopySamples(bw, samplesAccessor, leftDataByteCount, rightDataByteCount);
-
-                        if (rightDataByteCount % 2 == 1)
-                        {
-                            bw.Write((byte)0);
-                        }
-                        bw.Flush();
+                        bw.Write((byte)0);
                     }
+                    bw.Flush();
                 }
             }
         }
+    }
 
-        private static void WritePcmWavRIFFHeader(BinaryWriter bw, int samplesLength)
+    // Métodos a bajo nivel para leer, escribir y copiar tramos de archivos WAV.
+    class WAVIO
+    {
+        private static readonly short AUDIO_FORMAT_PCM = 1;
+
+        public static void WritePcmWavRIFFHeader(BinaryWriter bw, int sampleDataLength)
         {
             bw.Write("RIFF".ToCharArray());
-            bw.Write(40 + samplesLength + (samplesLength % 2));
+            bw.Write(40 + sampleDataLength + (sampleDataLength % 2));
             bw.Write("WAVE".ToCharArray());
         }
 
-        private static void WritePcmWavFmtSection(
+        public static void WritePcmWavFmtSection(
             BinaryWriter bw, int sampleRate, short numChannels, short bytesPerSample)
         {
             bw.Write("fmt ".ToCharArray());
@@ -122,13 +178,13 @@ namespace Chameleon
             bw.Write((short)(bytesPerSample * 8));
         }
 
-        private static void WriteDataHeader(BinaryWriter bw, int payloadSize)
+        public static void WriteDataHeader(BinaryWriter bw, int sampleDataLength)
         {
             bw.Write("data".ToCharArray());
-            bw.Write(payloadSize);
+            bw.Write(sampleDataLength);
         }
 
-        private static void CopySamples(
+        public static void CopySamples(
             BinaryWriter bw, MemoryMappedViewAccessor samplesAccessor, int samplesOffset, int samplesLength)
         {
             byte[] buffer = new byte[1024];
@@ -144,9 +200,7 @@ namespace Chameleon
             }
         }
 
-        private static readonly short AUDIO_FORMAT_PCM = 1;
-
-        private static (int, short, short) ReadPcmFmtSection(
+        public static (int, short, short) ReadPcmFmtSection(
             MemoryMappedFile mmf, int fmtOffset, int fmtSectionSize, bool isLittleEndian)
         {
             byte[] buffer4 = new byte[4];
@@ -220,7 +274,7 @@ namespace Chameleon
             }
         }
 
-        private static (int, int) FindSectionOffset(
+        public static (int, int) FindSectionOffset(
             MemoryMappedFile mmf, string targetSectionName, int riffPayloadSize, bool isLittleEndian)
         {
             int nextCheck = 12;
@@ -261,7 +315,7 @@ namespace Chameleon
             }
         }
 
-        private static (int, bool) ReadRIFFHeader(MemoryMappedFile mmf)
+        public static (int, bool) ReadRIFFHeader(MemoryMappedFile mmf)
         {
             byte[] buffer = new byte[4];
             using (MemoryMappedViewAccessor accessor = mmf.CreateViewAccessor(0, 12))
