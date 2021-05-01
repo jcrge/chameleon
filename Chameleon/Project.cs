@@ -42,5 +42,63 @@ namespace Chameleon
                 sw.Write(JsonConvert.SerializeObject(Index));
             }
         }
+
+        public void AppendChunk(string path)
+        {
+            if (!WAVEdition.IsPcmWav(path))
+            {
+                throw new IOException($"Not a PCM WAV file: {path}.");
+            }
+
+            string id = "" + Index.NextId;
+
+            File.Copy(path, StagingAreaFS.GetPathForChunk(id));
+
+            string name = Path.GetFileNameWithoutExtension(path);
+            if (name.Length > 15)
+            {
+                name = name.Substring(0, 15) + "...";
+            }
+
+            Index.Chunks.Add(new ChunkEntry
+            {
+                Id = id,
+                Name = name,
+            });
+            Index.NextId++;
+
+            FlushIndex();
+        }
+
+        public void SplitChunk(string sourceChunkId, int midpointMsec)
+        {
+            string leftId = "" + Index.NextId;
+            string rightId = "" + (Index.NextId + 1);
+
+            WAVEdition.Split(
+                StagingAreaFS.GetPathForChunk(sourceChunkId),
+                midpointMsec,
+                StagingAreaFS.GetPathForChunk(leftId),
+                StagingAreaFS.GetPathForChunk(rightId));
+
+            int sourceChunkPos = Index.Chunks.FindIndex(e => e.Id == sourceChunkId);
+            ChunkEntry sourceChunk = Index.Chunks[sourceChunkPos];
+
+            Index.Chunks.RemoveAt(sourceChunkPos);
+            Index.Chunks.Insert(sourceChunkPos, new ChunkEntry
+            {
+                Id = leftId,
+                Name = $"({sourceChunk.Name ?? "..."})[:{midpointMsec}ms]",
+            });
+            Index.Chunks.Insert(sourceChunkPos + 1, new ChunkEntry
+            {
+                Id = rightId,
+                Name = $"({sourceChunk.Name ?? "..."})[{midpointMsec}ms:]",
+            });
+            Index.NextId += 2;
+            FlushIndex();
+
+            File.Delete(StagingAreaFS.GetPathForChunk(sourceChunkId));
+        }
     }
 }
