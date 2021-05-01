@@ -15,9 +15,6 @@ using Xamarin.Essentials;
 
 namespace Chameleon
 {
-    class StagingAreaNotLoadedException : Exception { }
-    class StagingAreaLoadedException : Exception { }
-
     class StagingAreaNotReadyException : Exception
     {
         public StagingAreaNotReadyException() : base()
@@ -33,113 +30,46 @@ namespace Chameleon
 
     class StagingArea
     {
-        private bool isLoaded;
-        public bool IsLoaded
-        {
-            get => isLoaded;
-        }
-
-        public string StoredAtPath
-        {
-            get => Path.Combine(RootPath, "stored-at.txt");
-        }
-
-        private string compressedFilePath;
-        public string CompressedFilePath
-        {
-            get
-            {
-                if (!isLoaded)
-                {
-                    throw new StagingAreaNotLoadedException();
-                }
-
-                return compressedFilePath;
-            }
-        }
-
-        private string rootPath;
-        public string RootPath
-        {
-            get => rootPath;
-        }
-
-        public string ProjectPath
-        {
-            get => Path.Combine(RootPath, "current-project");
-        }
-
-        public string IndexPath
-        {
-            get => Path.Combine(ProjectPath, "index.json");
-        }
-
-        public string ChunksPath
-        {
-            get => Path.Combine(ProjectPath, "chunks");
-        }
-
-        public string GetPathForChunk(string id)
-        {
-            return Path.Combine(ChunksPath, $"{id}.wav");
-        }
-
-        private ProjectIndex index;
-        public ProjectIndex Index
-        {
-            get
-            {
-                if (!isLoaded)
-                {
-                    throw new StagingAreaNotLoadedException();
-                }
-
-                return index;
-            }
-        }
+        private StagingAreaFS StagingAreaFS;
 
         public StagingArea(string rootPath)
         {
-            this.rootPath = rootPath;
-            isLoaded = false;
+            StagingAreaFS = new StagingAreaFS(rootPath);
         }
 
-        public void Load()
+        public Project LoadRootDir()
         {
-            if (isLoaded)
+            if (!Directory.Exists(StagingAreaFS.RootPath))
             {
-                throw new StagingAreaLoadedException();
+                throw new StagingAreaNotReadyException($"Root directory '{StagingAreaFS.RootPath}' does not exist.");
+            }
+            if (!Directory.Exists(StagingAreaFS.ProjectPath))
+            {
+                throw new StagingAreaNotReadyException($"Project directory '{StagingAreaFS.ProjectPath}' does not exist.");
+            }
+            if (!Directory.Exists(StagingAreaFS.ChunksPath))
+            {
+                throw new StagingAreaNotReadyException($"Chunks directory '{StagingAreaFS.ChunksPath}' does not exist.");
             }
 
-            if (!Directory.Exists(RootPath))
-            {
-                throw new StagingAreaNotReadyException($"Root directory '{RootPath}' does not exist.");
-            }
-            if (!Directory.Exists(ProjectPath))
-            {
-                throw new StagingAreaNotReadyException($"Project directory '{ProjectPath}' does not exist.");
-            }
-            if (!Directory.Exists(ChunksPath))
-            {
-                throw new StagingAreaNotReadyException($"Chunks directory '{ChunksPath}' does not exist.");
-            }
-
+            string compressedFilePath;
             try
             {
-                using (StreamReader sr = new StreamReader(StoredAtPath))
+                using (StreamReader sr = new StreamReader(StagingAreaFS.StoredAtPath))
                 {
                     compressedFilePath = sr.ReadToEnd().Trim();
                 }
             }
             catch (IOException e)
             {
-                throw new StagingAreaNotReadyException($"I/O exception accessing {StoredAtPath}: {e.Message}");
+                throw new StagingAreaNotReadyException($"I/O exception accessing {StagingAreaFS.StoredAtPath}: {e.Message}");
             }
 
+            ProjectIndex index;
             try
             {
                 string indexJson;
-                using (StreamReader sr = new StreamReader(IndexPath))
+                using (StreamReader sr = new StreamReader(StagingAreaFS.IndexPath))
                 {
                     indexJson = sr.ReadToEnd();
                 }
@@ -147,51 +77,41 @@ namespace Chameleon
             }
             catch (Exception e) when (e is IOException || e is JsonReaderException)
             {
-                throw new StagingAreaNotReadyException($"I/O exception accessing {IndexPath}: {e.Message}");
+                throw new StagingAreaNotReadyException($"I/O exception accessing {StagingAreaFS.IndexPath}: {e.Message}");
             }
 
-            isLoaded = true;
+            return new Project(StagingAreaFS, index, compressedFilePath);
         }
 
-        public void CleanStagingArea()
+        public void Clean()
         {
-            if (isLoaded)
+            if (!Directory.Exists(StagingAreaFS.RootPath))
             {
-                throw new StagingAreaLoadedException();
+                throw new StagingAreaNotReadyException($"Root directory '{StagingAreaFS.RootPath}' does not exist.");
             }
 
-            if (!Directory.Exists(RootPath))
+            if (Directory.Exists(StagingAreaFS.ProjectPath))
             {
-                throw new StagingAreaNotReadyException($"Root directory '{RootPath}' does not exist.");
+                Directory.Delete(StagingAreaFS.ProjectPath, true);
             }
 
-            if (Directory.Exists(ProjectPath))
+            if (File.Exists(StagingAreaFS.StoredAtPath))
             {
-                Directory.Delete(ProjectPath, true);
-            }
-
-            if (File.Exists(StoredAtPath))
-            {
-                File.Delete(StoredAtPath);
+                File.Delete(StagingAreaFS.StoredAtPath);
             }
         }
 
         public void PrepareNewProject(string compressedFilePath)
         {
-            if (isLoaded)
-            {
-                throw new StagingAreaLoadedException();
-            }
-
-            CleanStagingArea();
-            using (StreamWriter sw = new StreamWriter(StoredAtPath))
+            Clean();
+            using (StreamWriter sw = new StreamWriter(StagingAreaFS.StoredAtPath))
             {
                 sw.WriteLine(compressedFilePath);
             }
 
-            Directory.CreateDirectory(ProjectPath);
-            Directory.CreateDirectory(ChunksPath);
-            using (StreamWriter sw = new StreamWriter(IndexPath))
+            Directory.CreateDirectory(StagingAreaFS.ProjectPath);
+            Directory.CreateDirectory(StagingAreaFS.ChunksPath);
+            using (StreamWriter sw = new StreamWriter(StagingAreaFS.IndexPath))
             {
                 sw.WriteLine(JsonConvert.SerializeObject(new ProjectIndex()));
             }
@@ -199,41 +119,12 @@ namespace Chameleon
 
         public void UncompressProject(string compressedFilePath)
         {
-            if (isLoaded)
-            {
-                throw new StagingAreaLoadedException();
-            }
-
-            CleanStagingArea();
-            Directory.CreateDirectory(ProjectPath);
-            ZipFile.ExtractToDirectory(compressedFilePath, ProjectPath);
-            using (StreamWriter sw = new StreamWriter(StoredAtPath))
+            Clean();
+            Directory.CreateDirectory(StagingAreaFS.ProjectPath);
+            ZipFile.ExtractToDirectory(compressedFilePath, StagingAreaFS.ProjectPath);
+            using (StreamWriter sw = new StreamWriter(StagingAreaFS.StoredAtPath))
             {
                 sw.WriteLine(compressedFilePath);
-            }
-        }
-
-        public void CompressProject()
-        {
-            if (!isLoaded)
-            {
-                throw new StagingAreaNotLoadedException();
-            }
-
-            Flush();
-            ZipFile.CreateFromDirectory(ProjectPath, compressedFilePath);
-        }
-
-        public void Flush()
-        {
-            if (!isLoaded)
-            {
-                throw new StagingAreaNotLoadedException();
-            }
-
-            using (StreamWriter sw = new StreamWriter(IndexPath))
-            {
-                sw.Write(JsonConvert.SerializeObject(index));
             }
         }
     }
