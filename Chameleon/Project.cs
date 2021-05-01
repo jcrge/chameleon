@@ -108,5 +108,10 @@ namespace Chameleon
 
             File.Delete(StagingAreaFS.GetPathForChunk(id));
         }
+
+        public void CloneChunk(string id, int newPos)
+        {
+            Index.Chunks.Insert(newPos, (ChunkEntry)Index.Chunks.Find(e => e.Id == id).Clone());
+        }
     }
 }

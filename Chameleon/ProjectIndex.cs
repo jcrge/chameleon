@@ -23,11 +23,22 @@ namespace Chameleon
         }
     }
 
-    class ChunkEntry
+    class ChunkEntry : ICloneable
     {
         public string Id;
         public string Name;
         public string Remarks;
         public string Subtitles;
+
+        public object Clone()
+        {
+            return new ChunkEntry
+            {
+                Id = Id,
+                Name = Name,
+                Remarks = Remarks,
+                Subtitles = Subtitles,
+            };
+        }
     }
 }
