@@ -54,6 +54,9 @@ namespace Chameleon
             project.SplitChunk("0", 6000);
             project.SplitChunk("1", 3000);
             project.SplitChunk("2", 2500);
+            project.DeleteChunk("3");
+            project.DeleteChunk("4");
+            project.DeleteChunk("5");
 
             Console.WriteLine("debug");
         }

@@ -100,5 +100,13 @@ namespace Chameleon
 
             File.Delete(StagingAreaFS.GetPathForChunk(sourceChunkId));
         }
+
+        public void DeleteChunk(string id)
+        {
+            Index.Chunks.RemoveAt(Index.Chunks.FindIndex(e => e.Id == id));
+            FlushIndex();
+
+            File.Delete(StagingAreaFS.GetPathForChunk(id));
+        }
     }
 }
