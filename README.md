@@ -35,3 +35,14 @@ Este es el repositorio de mi Proyecto de Fin de Ciclo.
     - Actualizar `NextId` a `NextId + 2`.
     - Eliminar el archivo de audio cuya entrada en el índice ya no existe.
     - Llamar a `StagingArea.Flush` para que los cambios en la clase índice se guarden de inmediato en su archivo asociado en `FileSystem.AppDataDirectory`. De lo contrario, si el usuario cerrase la aplicación sin guardar manualmente, la próxima vez que entrase el índice seguiría teniendo solamente la entrada eliminada y esta enlazaría con un archivo ya no existente.
+## Semana 2021/04/26 - 2021/05/02
+- Se implementa la clase `Project`.
+  - En vez de asignar a `StagingArea` todas las operaciones de manipulación del directorio de trabajo, existirán en esta última clase solo los métodos para prepararlo con un proyecto (es decir, o uno nuevo o uno ya existente).
+  - Una vez el directorio esté listo con un proyecto, `StagingArea.Load` devuelve un `Project` con métodos para realizar operaciones sobre el proyecto preparado.
+  - De este modo ya no es necesario distinguir constantemente en `StagingArea` entre estados cargado y no cargado y la clase es conceptualmente más simple.
+- Se implementan métodos en `Project` para realizar modificaciones controladas sobre un proyecto.
+  - `UpdateCompressedFile()`: actualiza el archivo de proyecto comprimido con la información del directorio de trabajo.
+  - `AppendChunk(string path)`: añade un segmento de audio al final de la lista de segmentos del proyecto.
+  - `SplitChunk(string sourceChunkId, int midpointMsec)`: divide un segmento de audio existente en el proyecto en dos subsegmentos en función de su ID y del punto de ruptura en milisegundos.
+  - `DeleteChunk(string id)`: elimina un segmento de audio del proyecto.
+- A partir de esta semana debería quedar solo implementar las interfaces gráficas para poner en funcionamiento las herramientas que he ido creando hasta ahora (de gestión del proyecto, grabación de audio, reproducción...).
