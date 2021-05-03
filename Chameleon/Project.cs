@@ -111,7 +111,8 @@ namespace Chameleon
 
         public void CloneChunk(string id, int newPos)
         {
-            Index.Chunks.Insert(newPos, (ChunkEntry)Index.Chunks.Find(e => e.Id == id).Clone());
+            //Index.Chunks.Insert(newPos, (ChunkEntry)Index.Chunks.Find(e => e.Id == id).Clone());
+	    //FlushIndex();
         }
     }
 }
