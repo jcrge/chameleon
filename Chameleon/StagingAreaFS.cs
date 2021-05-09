@@ -20,9 +20,9 @@ namespace Chameleon
             get => rootPath;
         }
 
-        public string StoredAtPath
+        public string CompressedStatePath
         {
-            get => Path.Combine(RootPath, "stored-at.txt");
+            get => Path.Combine(RootPath, "compressed-state.json");
         }
 
         public string ProjectPath

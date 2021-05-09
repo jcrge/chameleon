@@ -16,23 +16,52 @@ namespace Chameleon
 {
     class Project
     {
-        // Si se implementa el setter, este debe actualizar `stored-at.txt`.
-        public string CompressedFilePath { get; }
+        public string CompressedFilePath
+        {
+            get => CompressedState.Path;
+            set
+            {
+                CompressedState.Path = value;
+                FlushCompressedState();
+            }
+        }
+
+        public bool UnsavedChanges
+        {
+            get => CompressedState.UnsavedChanges;
+        }
 
         private ProjectIndex Index;
         private StagingAreaFS StagingAreaFS;
+        private CompressedStateInfo CompressedState;
 
-        public Project(StagingAreaFS stagingAreaFS, ProjectIndex index, string compressedFilePath)
+        public Project(StagingAreaFS stagingAreaFS, ProjectIndex index, CompressedStateInfo compressedState)
         {
             StagingAreaFS = stagingAreaFS;
             Index = index;
-            CompressedFilePath = compressedFilePath;
+            CompressedState = compressedState;
         }
 
         public void UpdateCompressedFile()
         {
+            if (CompressedState.Path == null)
+            {
+                throw new InvalidOperationException("Path is null in CompressedState.");
+            }
+
             FlushIndex();
-            ZipFile.CreateFromDirectory(StagingAreaFS.ProjectPath, CompressedFilePath);
+            ZipFile.CreateFromDirectory(StagingAreaFS.ProjectPath, CompressedState.Path);
+
+            CompressedState.UnsavedChanges = false;
+            FlushCompressedState();
+        }
+
+        public void FlushCompressedState()
+        {
+            using (StreamWriter sw = new StreamWriter(StagingAreaFS.CompressedStatePath))
+            {
+                sw.Write(JsonConvert.SerializeObject(CompressedState));
+            }
         }
 
         public void FlushIndex()
@@ -41,6 +70,14 @@ namespace Chameleon
             {
                 sw.Write(JsonConvert.SerializeObject(Index));
             }
+        }
+
+        private void IndexUpdated()
+        {
+            FlushIndex();
+
+            CompressedState.UnsavedChanges = true;
+            FlushCompressedState();
         }
 
         public void AppendChunk(string path)
@@ -67,7 +104,7 @@ namespace Chameleon
             });
             Index.NextId++;
 
-            FlushIndex();
+            IndexUpdated();
         }
 
         public void SplitChunk(string sourceChunkId, int midpointMsec)
@@ -96,7 +133,8 @@ namespace Chameleon
                 Name = $"({sourceChunk.Name ?? "..."})[{midpointMsec}ms:]",
             });
             Index.NextId += 2;
-            FlushIndex();
+
+            IndexUpdated();
 
             File.Delete(StagingAreaFS.GetPathForChunk(sourceChunkId));
         }
@@ -104,7 +142,7 @@ namespace Chameleon
         public void DeleteChunk(string id)
         {
             Index.Chunks.RemoveAt(Index.Chunks.FindIndex(e => e.Id == id));
-            FlushIndex();
+            IndexUpdated();
 
             File.Delete(StagingAreaFS.GetPathForChunk(id));
         }
