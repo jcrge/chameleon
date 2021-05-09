@@ -125,7 +125,17 @@ namespace Chameleon
         {
             Clean();
             Directory.CreateDirectory(StagingAreaFS.ProjectPath);
-            ZipFile.ExtractToDirectory(compressedFilePath, StagingAreaFS.ProjectPath);
+
+            try
+            {
+                ZipFile.ExtractToDirectory(compressedFilePath, StagingAreaFS.ProjectPath);
+            }
+            catch (InvalidDataException)
+            {
+                Clean();
+                throw new IOException($"Invalid Chameleon compressed file: {compressedFilePath}.");
+            }
+
             using (StreamWriter sw = new StreamWriter(StagingAreaFS.CompressedStatePath))
             {
                 sw.WriteLine(JsonConvert.SerializeObject(new CompressedStateInfo

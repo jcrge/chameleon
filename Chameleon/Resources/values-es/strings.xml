@@ -6,4 +6,11 @@
     <string name="action_loop">En bucle</string>
     <string name="action_start_recording">Grabar</string>
     <string name="action_stop_recording">Finalizar</string>
+    <string name="action_create_project">Nuevo proyecto...</string>
+    <string name="action_open_project">Abrir proyecto...</string>
+    <string name="action_recover_project">Restablecer la última sesión</string>
+    <string name="discard_staging_area_alert_title">Confirmación</string>
+    <string name="discard_staging_area_alert_message">Esta acción comenzará una nueva sesión, perdiéndose cualquier cambio no guardado en la que está actualmente abierta. ¿Estás seguro de que deseas continuar?</string>
+    <string name="error_uncompressing_project_alert_title">Error</string>
+    <string name="error_uncompressing_project_alert_message">El archivo seleccionado no es un proyecto Camaleón válido.</string>
 </resources>

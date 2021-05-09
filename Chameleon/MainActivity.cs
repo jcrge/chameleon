@@ -8,20 +8,26 @@ using AndroidX.AppCompat.App;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.Snackbar;
 using Xamarin.Essentials;
+using Android.Content;
 using System.Threading.Tasks;
 using AndroidX.Core.App;
 using Android;
 using System.IO;
+using Android.Widget;
+using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Chameleon
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        AudioPlayer audioPlayer;
-        AudioRecorder audioRecorder;
+        private Button CreateProjectButton;
+        private Button OpenProjectButton;
+        private Button RecoverProjectButton;
+        private StagingArea StagingArea;
 
-        protected override async void OnCreate(Bundle savedInstanceState)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
@@ -30,82 +36,117 @@ namespace Chameleon
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+            CreateProjectButton = FindViewById<Button>(Resource.Id.create_project_button);
+            OpenProjectButton = FindViewById<Button>(Resource.Id.open_project_button);
+            RecoverProjectButton = FindViewById<Button>(Resource.Id.recover_project_button);
 
-            audioPlayer = FindViewById<AudioPlayer>(Resource.Id.audio_player);
-            audioRecorder = FindViewById<AudioRecorder>(Resource.Id.audio_recorder);
-            //audioPlayer.AudioSource = await GetTestStream();
+            StagingArea = new StagingArea(Settings.STAGING_AREA_DIR);
 
-            ActivityCompat.RequestPermissions(this, new string[] { 
-                Manifest.Permission.WriteExternalStorage,
-                Manifest.Permission.RecordAudio
-            }, 1);
-
-            audioRecorder.AudioDestination = "/storage/emulated/0/Download/testfile2.out";
-            audioRecorder.RecordingReceived += filePath => audioPlayer.AudioSource = filePath;
-
-            //StagingArea stagingArea = new StagingArea(FileSystem.AppDataDirectory);
-            StagingArea stagingArea = new StagingArea("/storage/emulated/0/Download/test/");
-            stagingArea.PrepareNewProject("/storage/emulated/0/Download/compressed.chm");
-            Project project = stagingArea.LoadRootDir();
-            project.AppendChunk("/storage/emulated/0/Download/yy.wav");
-            project.AppendChunk("/storage/emulated/0/Download/yy.wav");
-            project.SplitChunk("0", 6000);
-            project.SplitChunk("1", 3000);
-            project.SplitChunk("2", 2500);
-            project.DeleteChunk("3");
-            project.DeleteChunk("4");
-            project.DeleteChunk("5");
-
-            Console.WriteLine("debug");
+            CreateProjectButton.Click += (s, e) => CreateProjectClicked();
+            OpenProjectButton.Click += (s, e) => OpenProjectClicked();
+            RecoverProjectButton.Click += (s, e) => RecoverProjectClicked();
         }
 
-        protected override void OnDestroy()
+        protected override void OnResume()
         {
-            base.OnDestroy();
-            audioPlayer.Dispose();
+            base.OnResume();
+            RecoverProjectButton.Enabled = ProjectReady();
         }
 
-        async Task<string> GetTestStream()
+        private void CreateProjectClicked()
         {
-            FileResult result = await FilePicker.PickAsync(new PickOptions
+            ConfirmDiscardSession(() =>
             {
-                PickerTitle = "Testing FilePicker"
+                StagingArea.PrepareNewProject();
+                StartProjectActivity();
             });
-
-            return result.FullPath;
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
+        private void OpenProjectClicked()
         {
-            MenuInflater.Inflate(Resource.Menu.menu_main, menu);
-            return true;
-        }
-
-        public override bool OnOptionsItemSelected(IMenuItem item)
-        {
-            int id = item.ItemId;
-            if (id == Resource.Id.action_settings)
+            ConfirmDiscardSession(async () =>
             {
+                FileResult result = await FilePicker.PickAsync();
+                if (result == null)
+                {
+                    return;
+                }
+
+                bool failed = false;
+                try
+                {
+                    StagingArea.UncompressProject(result.FullPath);
+                    if (!ProjectReady())
+                    {
+                        failed = true;
+                    }
+                }
+                catch (IOException)
+                {
+                    failed = true;
+                }
+
+                if (!failed)
+                {
+                    StartProjectActivity();
+                }
+                else
+                {
+                    StagingArea.Clean();
+                    RecoverProjectButton.Enabled = false;
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                    alert.SetTitle(GetString(Resource.String.error_uncompressing_project_alert_title));
+                    alert.SetMessage(GetString(Resource.String.error_uncompressing_project_alert_message));
+                    alert.SetPositiveButton(GetString(Android.Resource.String.Ok), (s, e) => { });
+                    alert.Create().Show();
+                }
+            });
+        }
+
+        private void RecoverProjectClicked()
+        {
+            StartProjectActivity();
+        }
+
+        private void StartProjectActivity()
+        {
+            StartActivity(new Intent(this, typeof(ProjectActivity)));
+        }
+
+        private void ConfirmDiscardSession(Action next)
+        {
+            if (!RecoverProjectButton.Enabled)
+            {
+                next();
+            }
+            else
+            {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.SetTitle(GetString(Resource.String.discard_staging_area_alert_title));
+                alert.SetMessage(GetString(Resource.String.discard_staging_area_alert_message));
+                alert.SetPositiveButton(GetString(Android.Resource.String.Ok), (s, e) =>
+                {
+                    next();
+                });
+                alert.SetNegativeButton(GetString(Android.Resource.String.Cancel), (s, e) =>
+                {
+                });
+                alert.Create().Show();
+            }
+        }
+
+        private bool ProjectReady()
+        {
+            try
+            {
+                StagingArea.LoadRootDir();
                 return true;
             }
-
-            return base.OnOptionsItemSelected(item);
-        }
-
-        private void FabOnClick(object sender, EventArgs eventArgs)
-        {
-            View view = (View) sender;
-            Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
-                .SetAction("Action", (View.IOnClickListener)null).Show();
-        }
-
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            catch (StagingAreaNotReadyException)
+            {
+                return false;
+            }
         }
 	}
 }
