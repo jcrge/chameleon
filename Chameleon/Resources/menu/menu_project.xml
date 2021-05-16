@@ -1,0 +1,36 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/action_split"
+        android:orderInCategory="1"
+        android:title="@string/action_split"
+        android:icon="@android:drawable/ic_menu_crop"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="2"
+        android:title="@string/action_delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_reorder_mode"
+        android:orderInCategory="3"
+        android:title="@string/action_reorder_mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="4"
+        android:title="@string/action_save"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_save_as"
+        android:orderInCategory="5"
+        android:title="@string/action_save_as"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_close"
+        android:orderInCategory="6"
+        android:title="@string/action_close"
+        app:showAsAction="never" />
+</menu>

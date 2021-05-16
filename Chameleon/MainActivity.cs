@@ -41,6 +41,24 @@ namespace Chameleon
             RecoverProjectButton = FindViewById<Button>(Resource.Id.recover_project_button);
 
             StagingArea = new StagingArea(Settings.STAGING_AREA_DIR);
+            //...
+            /*
+            StagingArea.PrepareNewProject();
+            Project p = StagingArea.LoadRootDir();
+            p.AppendChunk("/storage/emulated/0/Download/yy.wav");
+            p.SplitChunk("0", 3434); // "1", "2"
+            p.SplitChunk("2", 6000); // "1", "3", "4"
+            p.SplitChunk("4", 1234); // "1", "3", "5", "6"
+            p.SplitChunk("6", 5678); // "1", "3", "5", "7", "8"
+            p.SplitChunk("8", 1000);
+            p.SplitChunk("10", 1000);
+            p.SplitChunk("12", 1000);
+            p.SplitChunk("14", 1000);
+            p.SplitChunk("16", 1000);
+            p.SplitChunk("18", 1000);
+            p.SplitChunk("20", 1000);
+            */
+            //...
 
             CreateProjectButton.Click += (s, e) => CreateProjectClicked();
             OpenProjectButton.Click += (s, e) => OpenProjectClicked();
@@ -111,7 +129,9 @@ namespace Chameleon
 
         private void StartProjectActivity()
         {
-            StartActivity(new Intent(this, typeof(ProjectActivity)));
+            StartActivity(
+                new Intent(this, typeof(ProjectActivity)),
+                ActivityOptions.MakeSceneTransitionAnimation(this).ToBundle());
         }
 
         private void ConfirmDiscardSession(Action next)

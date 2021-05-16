@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Camaleón</string>
-    <string name="action_settings">Configuración</string>
     <string name="action_play">Reproducir</string>
     <string name="action_pause">Pausar</string>
     <string name="action_loop">En bucle</string>
@@ -8,9 +7,21 @@
     <string name="action_stop_recording">Finalizar</string>
     <string name="action_create_project">Nuevo proyecto...</string>
     <string name="action_open_project">Abrir proyecto...</string>
-    <string name="action_recover_project">Restablecer la última sesión</string>
+    <string name="action_recover_project">Continuar con la última sesión</string>
     <string name="discard_staging_area_alert_title">Confirmación</string>
     <string name="discard_staging_area_alert_message">Esta acción comenzará una nueva sesión, perdiéndose cualquier cambio no guardado en la que está actualmente abierta. ¿Estás seguro de que deseas continuar?</string>
     <string name="error_uncompressing_project_alert_title">Error</string>
     <string name="error_uncompressing_project_alert_message">El archivo seleccionado no es un proyecto Camaleón válido.</string>
+    <string name="error_appending_chunk_alert_title">Error</string>
+    <string name="error_appending_chunk_alert_message">No se ha podido añadir el archivo seleccionado al proyecto. Asegúrate de seleccionar un archivo válido de audio WAV en formato PCM no comprimido.</string>
+    <string name="no_title">Título no disponible</string>
+    <string name="no_subtitles">Subtítulos no disponibles</string>
+    <string name="action_close">Cerrar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_save_as">Guardar como...</string>
+    <string name="action_split">Dividir...</string>
+    <string name="action_reorder_mode">Modo de reordenación</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="no_unsaved_changes">No hay nuevos cambios para guardar.</string>
+    <string name="changes_saved_successfully">Se han guardado los cambios.</string>
 </resources>

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Chameleon</string>
-    <string name="action_settings">Settings</string>
     <string name="action_play">Play</string>
     <string name="action_pause">Pause</string>
     <string name="action_rewind" translatable="false">&lt;&lt;</string>
@@ -10,9 +9,21 @@
     <string name="action_stop_recording">Finish</string>
     <string name="action_create_project">New project...</string>
     <string name="action_open_project">Open project...</string>
-    <string name="action_recover_project">Restore last session</string>
+    <string name="action_recover_project">Continue with last session</string>
     <string name="discard_staging_area_alert_title">Confirmation</string>
     <string name="discard_staging_area_alert_message">This action will start a new session, losing any unsaved changes that you might have in the one that\'s currently open. Are you sure you want to proceed?</string>
     <string name="error_uncompressing_project_alert_title">Error</string>
     <string name="error_uncompressing_project_alert_message">The file selected is not a valid Chameleon project.</string>
+    <string name="error_appending_chunk_alert_title">Error</string>
+    <string name="error_appending_chunk_alert_message">The selected file could not be added to the project. Make sure to select a valid WAV audio file in uncompressed PCM format.</string>
+    <string name="no_title">No title available</string>
+    <string name="no_subtitles">No subtitles available</string>
+    <string name="action_close">Close</string>
+    <string name="action_save">Save</string>
+    <string name="action_save_as">Save as...</string>
+    <string name="action_split">Split...</string>
+    <string name="action_reorder_mode">Reorder mode</string>
+    <string name="action_delete">Delete</string>
+    <string name="no_unsaved_changes">There are no new changes to save.</string>
+    <string name="changes_saved_successfully">Your changes have been saved.</string>
 </resources>
