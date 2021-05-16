@@ -25,6 +25,10 @@ namespace Chameleon
         public short BytesPerSample { get; }
         public int SampleDataSize { get; }
         public MemoryMappedViewAccessor SampleData { get; }
+        public double DurationSec
+        {
+            get => SampleData.Capacity / ((double)BytesPerSample * NumChannels * SampleRate);
+        }
 
         private MemoryMappedFile Mmf;
 
@@ -81,27 +85,11 @@ namespace Chameleon
     // Métodos para realizar operaciones sobre archivos WAV, como juntarlos o dividirlos.
     class WAVEdition
     {
-        // Devuelve true si y solo si `path` es una ruta válida a un archivo legible WAV en formato PCM.
-        public static bool IsPcmWav(string path)
-        {
-            try
-            {
-                using (PcmWavView f = new PcmWavView(path))
-                {
-                    return true;
-                }
-            }
-            catch (IOException)
-            {
-                return false;
-            }
-        }
-
-        // Divide un archivo WAV en formato PCM en la ruta `sourcePath` en dos audios más cortos.
+        // Divide un archivo WAV en formato PCM en dos audios más cortos.
         // `midpointMsec` especifica el punto de ruptura en el audio en milisegundos. El segmento
         // previo al punto de ruptura se guarda en `leftDestPath`, y el segmento posterior, en
         // `rightDestPath`.
-        public static void Split(string sourcePath, int midpointMsec, string leftDestPath, string rightDestPath)
+        public static void Split(PcmWavView f, int midpointMsec, string leftDestPath, string rightDestPath)
         {
             if (midpointMsec <= 0)
             {
@@ -109,46 +97,43 @@ namespace Chameleon
                     $"The given midpointMsec value of {midpointMsec} is too low.");
             }
 
-            using (PcmWavView f = new PcmWavView(sourcePath))
+            // Número de bytes iniciales de la carga de "data" que deben conformar la carga total de la
+            // sección "data" de leftDestPath.
+            int leftDataByteCount = (int)((long)f.BytesPerSample * f.NumChannels * f.SampleRate * midpointMsec / 1000);
+            int rightDataByteCount = f.SampleDataSize - leftDataByteCount;
+
+            if (rightDataByteCount <= 0)
             {
-                // Número de bytes iniciales de la carga de "data" que deben conformar la carga total de la
-                // sección "data" de leftDestPath.
-                int leftDataByteCount = (int)((long)f.BytesPerSample * f.NumChannels * f.SampleRate * midpointMsec / 1000);
-                int rightDataByteCount = f.SampleDataSize - leftDataByteCount;
+                throw new ArgumentOutOfRangeException(
+                    $"The given midpointMsec value of {midpointMsec} is too high.");
+            }
 
-                if (rightDataByteCount <= 0)
+            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(leftDestPath)))
+            {
+                WAVIO.WritePcmWavRIFFHeader(bw, leftDataByteCount);
+                WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
+                WAVIO.WriteDataHeader(bw, leftDataByteCount);
+                WAVIO.CopySamples(bw, f.SampleData, 0, leftDataByteCount);
+
+                if (leftDataByteCount % 2 == 1)
                 {
-                    throw new ArgumentOutOfRangeException(
-                        $"The given midpointMsec value of {midpointMsec} is too high.");
+                    bw.Write((byte)0);
                 }
+                bw.Flush();
+            }
 
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(leftDestPath)))
+            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(rightDestPath)))
+            {
+                WAVIO.WritePcmWavRIFFHeader(bw, rightDataByteCount);
+                WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
+                WAVIO.WriteDataHeader(bw, rightDataByteCount);
+                WAVIO.CopySamples(bw, f.SampleData, leftDataByteCount, rightDataByteCount);
+
+                if (rightDataByteCount % 2 == 1)
                 {
-                    WAVIO.WritePcmWavRIFFHeader(bw, leftDataByteCount);
-                    WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
-                    WAVIO.WriteDataHeader(bw, leftDataByteCount);
-                    WAVIO.CopySamples(bw, f.SampleData, 0, leftDataByteCount);
-
-                    if (leftDataByteCount % 2 == 1)
-                    {
-                        bw.Write((byte)0);
-                    }
-                    bw.Flush();
+                    bw.Write((byte)0);
                 }
-
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(rightDestPath)))
-                {
-                    WAVIO.WritePcmWavRIFFHeader(bw, rightDataByteCount);
-                    WAVIO.WritePcmWavFmtSection(bw, f.SampleRate, f.NumChannels, f.BytesPerSample);
-                    WAVIO.WriteDataHeader(bw, rightDataByteCount);
-                    WAVIO.CopySamples(bw, f.SampleData, leftDataByteCount, rightDataByteCount);
-
-                    if (rightDataByteCount % 2 == 1)
-                    {
-                        bw.Write((byte)0);
-                    }
-                    bw.Flush();
-                }
+                bw.Flush();
             }
         }
     }

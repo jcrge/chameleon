@@ -29,6 +29,7 @@ namespace Chameleon
         public string Name;
         public string Remarks;
         public string Subtitles;
+        public double DurationSec; 
 
         public object Clone()
         {
@@ -38,6 +39,7 @@ namespace Chameleon
                 Name = Name,
                 Remarks = Remarks,
                 Subtitles = Subtitles,
+                DurationSec = DurationSec,
             };
         }
     }

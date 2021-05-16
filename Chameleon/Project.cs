@@ -31,7 +31,7 @@ namespace Chameleon
             get => CompressedState.UnsavedChanges;
         }
 
-        private ProjectIndex Index;
+        public ProjectIndex Index;
         private StagingAreaFS StagingAreaFS;
         private CompressedStateInfo CompressedState;
 
@@ -82,7 +82,15 @@ namespace Chameleon
 
         public void AppendChunk(string path)
         {
-            if (!WAVEdition.IsPcmWav(path))
+            double durationSec;
+            try
+            {
+                using (PcmWavView view = new PcmWavView(path))
+                {
+                    durationSec = view.DurationSec;
+                }
+            }
+            catch (IOException)
             {
                 throw new IOException($"Not a PCM WAV file: {path}.");
             }
@@ -101,6 +109,7 @@ namespace Chameleon
             {
                 Id = id,
                 Name = name,
+                DurationSec = durationSec,
             });
             Index.NextId++;
 
@@ -109,14 +118,20 @@ namespace Chameleon
 
         public void SplitChunk(string sourceChunkId, int midpointMsec)
         {
+            double midpointSec = midpointMsec / (double)1000;
             string leftId = "" + Index.NextId;
             string rightId = "" + (Index.NextId + 1);
 
-            WAVEdition.Split(
-                StagingAreaFS.GetPathForChunk(sourceChunkId),
-                midpointMsec,
-                StagingAreaFS.GetPathForChunk(leftId),
-                StagingAreaFS.GetPathForChunk(rightId));
+            double sourceChunkDurationSec;
+            using (PcmWavView pcmWavView = new PcmWavView(StagingAreaFS.GetPathForChunk(sourceChunkId)))
+            {
+                sourceChunkDurationSec = pcmWavView.DurationSec;
+                WAVEdition.Split(
+                    pcmWavView,
+                    midpointMsec,
+                    StagingAreaFS.GetPathForChunk(leftId),
+                    StagingAreaFS.GetPathForChunk(rightId));
+            }
 
             int sourceChunkPos = Index.Chunks.FindIndex(e => e.Id == sourceChunkId);
             ChunkEntry sourceChunk = Index.Chunks[sourceChunkPos];
@@ -126,11 +141,13 @@ namespace Chameleon
             {
                 Id = leftId,
                 Name = $"({sourceChunk.Name ?? "..."})[:{midpointMsec}ms]",
+                DurationSec = midpointSec,
             });
             Index.Chunks.Insert(sourceChunkPos + 1, new ChunkEntry
             {
                 Id = rightId,
                 Name = $"({sourceChunk.Name ?? "..."})[{midpointMsec}ms:]",
+                DurationSec = sourceChunkDurationSec - midpointSec,
             });
             Index.NextId += 2;
 
