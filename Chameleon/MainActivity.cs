@@ -78,26 +78,22 @@ namespace Chameleon
             });
         }
 
+        private static readonly int ACTIVITY_RESULT_PROJECT_SELECTED = 1;
+
         private void OpenProjectClicked()
+        {
+            Intent intent = new Intent(this, typeof(ActivitySelectProject));
+            StartActivityForResult(intent, ACTIVITY_RESULT_PROJECT_SELECTED);
+        }
+
+        private void ProjectNameSelected(string name)
         {
             ConfirmDiscardSession(() =>
             {
-                /*
-                FileResult result = await FilePicker.PickAsync();
-                if (result == null)
-                {
-                    return;
-                }
-                string projectPath = result.FullPath;
-                */
-                // TODO: en vez de pedir un archivo para abrir, pedir un nombre
-                // de proyecto dentro de la carpeta de proyectos.
-                string projectName = "testproject";
-
                 bool failed = false;
                 try
                 {
-                    StagingArea.UncompressProject(projectName);
+                    StagingArea.UncompressProject(name);
                     if (!ProjectReady())
                     {
                         failed = true;
@@ -124,6 +120,18 @@ namespace Chameleon
                     alert.Create().Show();
                 }
             });
+        }
+
+        protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
+        {
+            if (requestCode == ACTIVITY_RESULT_PROJECT_SELECTED && resultCode == Result.Ok)
+            {
+                ProjectNameSelected(data.GetStringExtra(ActivitySelectProject.CHOSEN_NAME));
+            }
+            else
+            {
+                base.OnActivityResult(requestCode, resultCode, data);
+            }
         }
 
         private void RecoverProjectClicked()

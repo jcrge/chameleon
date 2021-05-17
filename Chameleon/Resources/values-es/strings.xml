@@ -27,4 +27,5 @@
     <string name="choose_name">Elige un nombre para el proyecto:</string>
     <string name="error_project_already_exists_title">Error</string>
     <string name="error_project_already_exists_message">El nombre de proyecto especificado ya está en uso. Por favor, elige otro.</string>
+    <string name="select_project">Toca un nombre de proyecto para seleccionarlo.</string>
 </resources>

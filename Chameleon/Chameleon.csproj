@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityProjectNameChooser.cs" />
+    <Compile Include="ActivitySelectProject.cs" />
     <Compile Include="AudioPlayer.cs" />
     <Compile Include="CompressedStateInfo.cs" />
     <Compile Include="MainActivity.cs" />
@@ -147,6 +148,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\activity_project_name_chooser.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_select_project.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
