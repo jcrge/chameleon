@@ -23,10 +23,13 @@ namespace Chameleon
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class ProjectActivity : AppCompatActivity
     {
+        private enum RecyclerViewMode { Selection, Reorder, Normal }
+
         private Project Project;
         private RecyclerView RecyclerView;
         private ProjectViewAdapter Adapter;
         private List<SelectableChunkEntry> Entries;
+        private RecyclerViewMode Mode;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -45,6 +48,7 @@ namespace Chameleon
             Project = StagingArea.LoadRootDir();
 
             Entries = Project.Index.Chunks.Select(c => new SelectableChunkEntry(c)).ToList();
+            Mode = RecyclerViewMode.Normal;
             if (savedInstanceState != null)
             {
                 bool[] selectedRows = savedInstanceState.GetBooleanArray(STATE_SELECTED_ROWS);
@@ -52,6 +56,8 @@ namespace Chameleon
                 {
                     Entries[i].Selected = selectedRows[i];
                 }
+
+                Mode = (RecyclerViewMode)savedInstanceState.GetInt("RECYCLER_VIEW_MODE");
             }
 
             Adapter = new ProjectViewAdapter(Entries);
@@ -59,13 +65,68 @@ namespace Chameleon
             RecyclerView.SetLayoutManager(new LinearLayoutManager(this));
             RecyclerView.AddItemDecoration(
                 new DividerItemDecoration(RecyclerView.Context, DividerItemDecoration.Vertical));
+
+            Adapter.ItemClick += (s, e) => EntryClicked(e.Position, Entries[e.Position]);
+            Adapter.ItemLongClick += (s, e) => EntryLongClicked(e.Position, Entries[e.Position]);
         }
 
         private static readonly string STATE_SELECTED_ROWS = "SELECTED_ROWS";
+        private static readonly string STATE_RECYCLER_VIEW_MODE = "RECYCLER_VIEW_MODE";
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);
             outState.PutBooleanArray(STATE_SELECTED_ROWS, Entries.Select(e => e.Selected).ToArray());
+            outState.PutInt(STATE_RECYCLER_VIEW_MODE, (int)Mode);
+        }
+
+        private void EntryClicked(int position, SelectableChunkEntry entry)
+        {
+            switch (Mode)
+            {
+                case RecyclerViewMode.Selection:
+                    entry.Selected = !entry.Selected;
+                    Adapter.NotifyItemChanged(position);
+                    break;
+            }
+        }
+
+        private void EntryLongClicked(int position, SelectableChunkEntry entry)
+        {
+            switch (Mode)
+            {
+                case RecyclerViewMode.Selection:
+                    entry.Selected = !entry.Selected;
+                    Adapter.NotifyItemChanged(position);
+                    break;
+
+                case RecyclerViewMode.Normal:
+                    Mode = RecyclerViewMode.Selection;
+                    entry.Selected = true;
+                    Adapter.NotifyItemChanged(position);
+                    break;
+            }
+        }
+
+        public override void OnBackPressed()
+        {
+            switch (Mode)
+            {
+                case RecyclerViewMode.Selection:
+                    for (int i = 0; i < Entries.Count; i++)
+                    {
+                        if (Entries[i].Selected)
+                        {
+                            Entries[i].Selected = false;
+                            Adapter.NotifyItemChanged(i);
+                        }
+                    }
+                    Mode = RecyclerViewMode.Normal;
+                    break;
+
+                default:
+                    base.OnBackPressed();
+                    break;
+            }
         }
 
         private async void NewChunk()
