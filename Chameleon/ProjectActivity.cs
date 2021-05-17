@@ -26,6 +26,7 @@ namespace Chameleon
         private Project Project;
         private RecyclerView RecyclerView;
         private ProjectViewAdapter Adapter;
+        private List<SelectableChunkEntry> Entries;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -43,11 +44,28 @@ namespace Chameleon
 
             Project = StagingArea.LoadRootDir();
 
-            Adapter = new ProjectViewAdapter(Project.Index.Chunks);
+            Entries = Project.Index.Chunks.Select(c => new SelectableChunkEntry(c)).ToList();
+            if (savedInstanceState != null)
+            {
+                bool[] selectedRows = savedInstanceState.GetBooleanArray(STATE_SELECTED_ROWS);
+                for (int i = 0; i < selectedRows.Length; i++)
+                {
+                    Entries[i].Selected = selectedRows[i];
+                }
+            }
+
+            Adapter = new ProjectViewAdapter(Entries);
             RecyclerView.SetAdapter(Adapter);
             RecyclerView.SetLayoutManager(new LinearLayoutManager(this));
             RecyclerView.AddItemDecoration(
                 new DividerItemDecoration(RecyclerView.Context, DividerItemDecoration.Vertical));
+        }
+
+        private static readonly string STATE_SELECTED_ROWS = "SELECTED_ROWS";
+        protected override void OnSaveInstanceState(Bundle outState)
+        {
+            base.OnSaveInstanceState(outState);
+            outState.PutBooleanArray(STATE_SELECTED_ROWS, Entries.Select(e => e.Selected).ToArray());
         }
 
         private async void NewChunk()
@@ -61,8 +79,10 @@ namespace Chameleon
             try
             {
                 Project.AppendChunk(result.FullPath);
-
                 int pos = Project.Index.Chunks.Count - 1;
+
+                Entries.Insert(pos, new SelectableChunkEntry(Project.Index.Chunks.Last()));
+
                 Adapter.NotifyItemInserted(pos);
                 RecyclerView.ScrollToPosition(pos);
             }

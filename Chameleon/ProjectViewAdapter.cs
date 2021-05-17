@@ -9,13 +9,16 @@ namespace Chameleon
 {
     class ProjectViewAdapter : RecyclerView.Adapter
     {
+        private static readonly Color COLOR_SELECTED = Color.ParseColor("#27ad1b");
+        private static readonly Color COLOR_UNSELECTED = Color.ParseColor("#ffffff");
+
         public event EventHandler<ProjectViewAdapterClickEventArgs> ItemClick;
         public event EventHandler<ProjectViewAdapterClickEventArgs> ItemLongClick;
-        private List<ChunkEntry> Chunks;
+        private List<SelectableChunkEntry> Entries;
 
-        public ProjectViewAdapter(List<ChunkEntry> chunks)
+        public ProjectViewAdapter(List<SelectableChunkEntry> entries)
         {
-            Chunks = chunks;
+            Entries = entries;
         }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -27,12 +30,12 @@ namespace Chameleon
         public override void OnBindViewHolder(RecyclerView.ViewHolder viewHolder, int position)
         {
             var context = viewHolder.ItemView.Context;
-            ChunkEntry chunk = Chunks[position];
+            SelectableChunkEntry entry = Entries[position];
 
-            string title = chunk.Name;
-            string subs = chunk.Subtitles;
+            string title = entry.Chunk.Name;
+            string subs = entry.Chunk.Subtitles;
 
-            double durationSec = chunk.DurationSec;
+            double durationSec = entry.Chunk.DurationSec;
             int minutes = ((int)durationSec) / 60;
             int seconds = ((int)durationSec) % 60;
             int milliseconds = (int)((durationSec - ((int)durationSec)) * 1000);
@@ -42,10 +45,11 @@ namespace Chameleon
             holder.Title.Text = string.IsNullOrEmpty(title) ? context.GetString(Resource.String.no_title) : title;
             holder.Subtitles.Text = string.IsNullOrEmpty(subs) ? context.GetString(Resource.String.no_subtitles) : subs;
             holder.Duration.Text = duration;
-            //holder.ItemView.SetBackgroundColor(Color.ParseColor(position % 2 == 0 ? "#ff0000" : "#0000ff"));
+
+            holder.ItemView.SetBackgroundColor(entry.Selected ? COLOR_SELECTED : COLOR_UNSELECTED);
         }
 
-        public override int ItemCount => Chunks.Count;
+        public override int ItemCount => Entries.Count;
 
         private void OnClick(ProjectViewAdapterClickEventArgs args) => ItemClick?.Invoke(this, args);
         private void OnLongClick(ProjectViewAdapterClickEventArgs args) => ItemLongClick?.Invoke(this, args);
@@ -72,6 +76,18 @@ namespace Chameleon
                 View = itemView,
                 Position = AdapterPosition
             });
+        }
+    }
+
+    class SelectableChunkEntry
+    {
+        public ChunkEntry Chunk;
+        public bool Selected;
+
+        public SelectableChunkEntry(ChunkEntry chunk)
+        {
+            Chunk = chunk;
+            Selected = false;
         }
     }
 
