@@ -9,7 +9,7 @@
     <string name="action_stop_recording">Finish</string>
     <string name="action_create_project">New project...</string>
     <string name="action_open_project">Open project...</string>
-    <string name="action_recover_project">Continue with last session</string>
+    <string name="action_recover_project">Enter active session</string>
     <string name="discard_staging_area_alert_title">Confirmation</string>
     <string name="discard_staging_area_alert_message">This action will start a new session, losing any unsaved changes that you might have in the one that\'s currently open. Are you sure you want to proceed?</string>
     <string name="error_uncompressing_project_alert_title">Error</string>

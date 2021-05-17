@@ -120,13 +120,6 @@ namespace Chameleon
             return true;
         }
 
-        public override void OnBackPressed()
-        {
-            Project.FlushCompressedState();
-            Project.FlushIndex();
-            FinishAffinity();
-        }
-
         private void SaveChanges()
         {
             Project.UpdateCompressedFile();
