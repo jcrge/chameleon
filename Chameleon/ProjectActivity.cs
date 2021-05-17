@@ -135,16 +135,8 @@ namespace Chameleon
 
         private void SaveChangesAs()
         {
-            /*
-            Intent saveIntent = new Intent(Intent.ActionCreateDocument);
-            saveIntent.AddCategory(Intent.CategoryOpenable);
-            saveIntent.SetType("* /*"); // Sin el espacio.
-            StartActivityForResult(Intent.CreateChooser(saveIntent, "..."), ACTIVITY_RESULT_SAVE_AS_DIALOG);
-            */
-            // TODO: se lanza una actividad para pedir un nombre de proyecto válido. El resultado se
-            // gestiona en OnActivityResult, asignando un valor a Project.Name y llamando a SaveChanges.
-            Project.Name = "testproject";
-            SaveChanges();
+            Intent intent = new Intent(this, typeof(ActivityProjectNameChooser));
+            StartActivityForResult(intent, ACTIVITY_RESULT_SAVE_AS_DIALOG);
         }
 
         private static readonly int ACTIVITY_RESULT_SAVE_AS_DIALOG = 1;
@@ -153,7 +145,7 @@ namespace Chameleon
         {
             if (requestCode == ACTIVITY_RESULT_SAVE_AS_DIALOG && resultCode == Result.Ok)
             {
-                //Project.Name = ...;
+                Project.Name = data.GetStringExtra(ActivityProjectNameChooser.CHOSEN_NAME);
                 SaveChanges();
             }
             else

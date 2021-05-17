@@ -26,4 +26,7 @@
     <string name="action_delete">Delete</string>
     <string name="no_unsaved_changes">There are no new changes to save.</string>
     <string name="changes_saved_successfully">Your changes have been saved.</string>
+    <string name="choose_name">Please choose a name for the project:</string>
+    <string name="error_project_already_exists_title">Error</string>
+    <string name="error_project_already_exists_message">The specified project name is already in use. Please choose another.</string>
 </resources>

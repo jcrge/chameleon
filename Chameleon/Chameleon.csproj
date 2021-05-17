@@ -63,6 +63,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityProjectNameChooser.cs" />
     <Compile Include="AudioPlayer.cs" />
     <Compile Include="CompressedStateInfo.cs" />
     <Compile Include="MainActivity.cs" />
@@ -141,6 +142,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\rv_chunk.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_project_name_chooser.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
