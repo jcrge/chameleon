@@ -30,33 +30,26 @@ namespace Chameleon
 
     class StagingArea
     {
-        private StagingAreaFS StagingAreaFS;
-
-        public StagingArea(string rootPath)
+        public static Project LoadRootDir()
         {
-            StagingAreaFS = new StagingAreaFS(rootPath);
-        }
-
-        public Project LoadRootDir()
-        {
-            if (!Directory.Exists(StagingAreaFS.RootPath))
+            if (!Directory.Exists(Settings.StagingAreaPath))
             {
-                throw new StagingAreaNotReadyException($"Root directory '{StagingAreaFS.RootPath}' does not exist.");
+                throw new StagingAreaNotReadyException($"Staging area directory '{Settings.StagingAreaPath}' does not exist.");
             }
-            if (!Directory.Exists(StagingAreaFS.ProjectPath))
+            if (!Directory.Exists(Settings.UncompressedProjectPath))
             {
-                throw new StagingAreaNotReadyException($"Project directory '{StagingAreaFS.ProjectPath}' does not exist.");
+                throw new StagingAreaNotReadyException($"Project directory '{Settings.UncompressedProjectPath}' does not exist.");
             }
-            if (!Directory.Exists(StagingAreaFS.ChunksPath))
+            if (!Directory.Exists(Settings.ChunksPath))
             {
-                throw new StagingAreaNotReadyException($"Chunks directory '{StagingAreaFS.ChunksPath}' does not exist.");
+                throw new StagingAreaNotReadyException($"Chunks directory '{Settings.ChunksPath}' does not exist.");
             }
 
             CompressedStateInfo compressedState;
             try
             {
                 string compressedStateJson;
-                using (StreamReader sr = new StreamReader(StagingAreaFS.CompressedStatePath))
+                using (StreamReader sr = new StreamReader(Settings.CompressedStatePath))
                 {
                     compressedStateJson = sr.ReadToEnd();
                 }
@@ -65,14 +58,14 @@ namespace Chameleon
             catch (Exception e) when (e is IOException || e is JsonReaderException)
             {
                 throw new StagingAreaNotReadyException(
-                    $"I/O exception accessing {StagingAreaFS.CompressedStatePath}: {e.Message}");
+                    $"I/O exception accessing {Settings.CompressedStatePath}: {e.Message}");
             }
 
             ProjectIndex index;
             try
             {
                 string indexJson;
-                using (StreamReader sr = new StreamReader(StagingAreaFS.IndexPath))
+                using (StreamReader sr = new StreamReader(Settings.IndexPath))
                 {
                     indexJson = sr.ReadToEnd();
                 }
@@ -81,66 +74,67 @@ namespace Chameleon
             catch (Exception e) when (e is IOException || e is JsonReaderException)
             {
                 throw new StagingAreaNotReadyException(
-                    $"I/O exception accessing {StagingAreaFS.IndexPath}: {e.Message}");
+                    $"I/O exception accessing {Settings.IndexPath}: {e.Message}");
             }
 
-            return new Project(StagingAreaFS, index, compressedState);
+            return new Project(index, compressedState);
         }
 
-        public void Clean()
+        public static void Clean()
         {
-            if (!Directory.Exists(StagingAreaFS.RootPath))
+            if (!Directory.Exists(Settings.StagingAreaPath))
             {
-                throw new StagingAreaNotReadyException($"Root directory '{StagingAreaFS.RootPath}' does not exist.");
+                throw new StagingAreaNotReadyException(
+                    $"Staging area directory '{Settings.StagingAreaPath}' does not exist.");
             }
 
-            if (Directory.Exists(StagingAreaFS.ProjectPath))
+            if (Directory.Exists(Settings.UncompressedProjectPath))
             {
-                Directory.Delete(StagingAreaFS.ProjectPath, true);
+                Directory.Delete(Settings.UncompressedProjectPath, true);
             }
 
-            if (File.Exists(StagingAreaFS.CompressedStatePath))
+            if (File.Exists(Settings.CompressedStatePath))
             {
-                File.Delete(StagingAreaFS.CompressedStatePath);
+                File.Delete(Settings.CompressedStatePath);
             }
         }
 
-        public void PrepareNewProject()
+        public static void PrepareNewProject()
         {
             Clean();
-            using (StreamWriter sw = new StreamWriter(StagingAreaFS.CompressedStatePath))
+            using (StreamWriter sw = new StreamWriter(Settings.CompressedStatePath))
             {
                 sw.WriteLine(JsonConvert.SerializeObject(new CompressedStateInfo()));
             }
 
-            Directory.CreateDirectory(StagingAreaFS.ProjectPath);
-            Directory.CreateDirectory(StagingAreaFS.ChunksPath);
-            using (StreamWriter sw = new StreamWriter(StagingAreaFS.IndexPath))
+            Directory.CreateDirectory(Settings.UncompressedProjectPath);
+            Directory.CreateDirectory(Settings.ChunksPath);
+            using (StreamWriter sw = new StreamWriter(Settings.IndexPath))
             {
                 sw.WriteLine(JsonConvert.SerializeObject(new ProjectIndex()));
             }
         }
 
-        public void UncompressProject(string compressedFilePath)
+        public static void UncompressProject(string name)
         {
             Clean();
-            Directory.CreateDirectory(StagingAreaFS.ProjectPath);
+            Directory.CreateDirectory(Settings.UncompressedProjectPath);
 
             try
             {
-                ZipFile.ExtractToDirectory(compressedFilePath, StagingAreaFS.ProjectPath);
+                ZipFile.ExtractToDirectory(Settings.GetPathForProject(name), Settings.UncompressedProjectPath);
             }
             catch (InvalidDataException)
             {
                 Clean();
-                throw new IOException($"Invalid Chameleon compressed file: {compressedFilePath}.");
+                throw new IOException($"Invalid Chameleon compressed file: {name}.");
             }
 
-            using (StreamWriter sw = new StreamWriter(StagingAreaFS.CompressedStatePath))
+            using (StreamWriter sw = new StreamWriter(Settings.CompressedStatePath))
             {
                 sw.WriteLine(JsonConvert.SerializeObject(new CompressedStateInfo
                 {
-                    Path = compressedFilePath,
+                    ProjectName = name,
                     UnsavedChanges = false,
                 }));
             }

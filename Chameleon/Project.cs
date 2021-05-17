@@ -16,12 +16,12 @@ namespace Chameleon
 {
     class Project
     {
-        public string CompressedFilePath
+        public string Name
         {
-            get => CompressedState.Path;
+            get => CompressedState.ProjectName;
             set
             {
-                CompressedState.Path = value;
+                CompressedState.ProjectName = value;
                 FlushCompressedState();
             }
         }
@@ -32,25 +32,28 @@ namespace Chameleon
         }
 
         public ProjectIndex Index;
-        private StagingAreaFS StagingAreaFS;
         private CompressedStateInfo CompressedState;
 
-        public Project(StagingAreaFS stagingAreaFS, ProjectIndex index, CompressedStateInfo compressedState)
+        public Project(ProjectIndex index, CompressedStateInfo compressedState)
         {
-            StagingAreaFS = stagingAreaFS;
             Index = index;
             CompressedState = compressedState;
         }
 
         public void UpdateCompressedFile()
         {
-            if (CompressedState.Path == null)
+            if (CompressedState.ProjectName == null)
             {
-                throw new InvalidOperationException("Path is null in CompressedState.");
+                throw new InvalidOperationException("ProjectName is null in CompressedState.");
             }
 
             FlushIndex();
-            ZipFile.CreateFromDirectory(StagingAreaFS.ProjectPath, CompressedState.Path);
+            string path = Settings.GetPathForProject(CompressedState.ProjectName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            ZipFile.CreateFromDirectory(Settings.UncompressedProjectPath, path);
 
             CompressedState.UnsavedChanges = false;
             FlushCompressedState();
@@ -58,7 +61,7 @@ namespace Chameleon
 
         public void FlushCompressedState()
         {
-            using (StreamWriter sw = new StreamWriter(StagingAreaFS.CompressedStatePath))
+            using (StreamWriter sw = new StreamWriter(Settings.CompressedStatePath))
             {
                 sw.Write(JsonConvert.SerializeObject(CompressedState));
             }
@@ -66,7 +69,7 @@ namespace Chameleon
 
         public void FlushIndex()
         {
-            using (StreamWriter sw = new StreamWriter(StagingAreaFS.IndexPath))
+            using (StreamWriter sw = new StreamWriter(Settings.IndexPath))
             {
                 sw.Write(JsonConvert.SerializeObject(Index));
             }
@@ -97,7 +100,7 @@ namespace Chameleon
 
             string id = "" + Index.NextId;
 
-            File.Copy(path, StagingAreaFS.GetPathForChunk(id));
+            File.Copy(path, Settings.GetPathForChunk(id));
 
             string name = Path.GetFileNameWithoutExtension(path);
             if (name.Length > 15)
@@ -123,14 +126,14 @@ namespace Chameleon
             string rightId = "" + (Index.NextId + 1);
 
             double sourceChunkDurationSec;
-            using (PcmWavView pcmWavView = new PcmWavView(StagingAreaFS.GetPathForChunk(sourceChunkId)))
+            using (PcmWavView pcmWavView = new PcmWavView(Settings.GetPathForChunk(sourceChunkId)))
             {
                 sourceChunkDurationSec = pcmWavView.DurationSec;
                 WAVEdition.Split(
                     pcmWavView,
                     midpointMsec,
-                    StagingAreaFS.GetPathForChunk(leftId),
-                    StagingAreaFS.GetPathForChunk(rightId));
+                    Settings.GetPathForChunk(leftId),
+                    Settings.GetPathForChunk(rightId));
             }
 
             int sourceChunkPos = Index.Chunks.FindIndex(e => e.Id == sourceChunkId);
@@ -153,7 +156,7 @@ namespace Chameleon
 
             IndexUpdated();
 
-            File.Delete(StagingAreaFS.GetPathForChunk(sourceChunkId));
+            File.Delete(Settings.GetPathForChunk(sourceChunkId));
         }
 
         public void DeleteChunk(string id)
@@ -161,7 +164,7 @@ namespace Chameleon
             Index.Chunks.RemoveAt(Index.Chunks.FindIndex(e => e.Id == id));
             IndexUpdated();
 
-            File.Delete(StagingAreaFS.GetPathForChunk(id));
+            File.Delete(Settings.GetPathForChunk(id));
         }
 
         public void CloneChunk(string id, int newPos)

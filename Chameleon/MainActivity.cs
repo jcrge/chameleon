@@ -25,7 +25,6 @@ namespace Chameleon
         private Button CreateProjectButton;
         private Button OpenProjectButton;
         private Button RecoverProjectButton;
-        private StagingArea StagingArea;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -40,7 +39,6 @@ namespace Chameleon
             OpenProjectButton = FindViewById<Button>(Resource.Id.open_project_button);
             RecoverProjectButton = FindViewById<Button>(Resource.Id.recover_project_button);
 
-            StagingArea = new StagingArea(Settings.STAGING_AREA_DIR);
             //...
             /*
             StagingArea.PrepareNewProject();
@@ -82,18 +80,24 @@ namespace Chameleon
 
         private void OpenProjectClicked()
         {
-            ConfirmDiscardSession(async () =>
+            ConfirmDiscardSession(() =>
             {
+                /*
                 FileResult result = await FilePicker.PickAsync();
                 if (result == null)
                 {
                     return;
                 }
+                string projectPath = result.FullPath;
+                */
+                // TODO: en vez de pedir un archivo para abrir, pedir un nombre
+                // de proyecto dentro de la carpeta de proyectos.
+                string projectName = "testproject";
 
                 bool failed = false;
                 try
                 {
-                    StagingArea.UncompressProject(result.FullPath);
+                    StagingArea.UncompressProject(projectName);
                     if (!ProjectReady())
                     {
                         failed = true;

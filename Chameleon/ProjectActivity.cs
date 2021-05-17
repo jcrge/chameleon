@@ -24,7 +24,6 @@ namespace Chameleon
     public class ProjectActivity : AppCompatActivity
     {
         private Project Project;
-        private StagingArea StagingArea;
         private RecyclerView RecyclerView;
         private ProjectViewAdapter Adapter;
 
@@ -42,7 +41,6 @@ namespace Chameleon
 
             RecyclerView = FindViewById<RecyclerView>(Resource.Id.chunks);
 
-            StagingArea = new StagingArea(Settings.STAGING_AREA_DIR);
             Project = StagingArea.LoadRootDir();
 
             Adapter = new ProjectViewAdapter(Project.Index.Chunks);
@@ -89,7 +87,7 @@ namespace Chameleon
             switch (item.ItemId)
             {
                 case Resource.Id.action_save:
-                    if (Project.CompressedFilePath == null)
+                    if (Project.Name == null)
                     {
                         SaveChangesAs();
                     }
@@ -132,15 +130,21 @@ namespace Chameleon
         private void SaveChanges()
         {
             Project.UpdateCompressedFile();
-            Toast.MakeText(this, Resource.String.changes_saved_successfully, ToastLength.Long);
+            Toast.MakeText(this, Resource.String.changes_saved_successfully, ToastLength.Long).Show();
         }
 
         private void SaveChangesAs()
         {
+            /*
             Intent saveIntent = new Intent(Intent.ActionCreateDocument);
             saveIntent.AddCategory(Intent.CategoryOpenable);
-            saveIntent.SetType("*/*");
+            saveIntent.SetType("* /*"); // Sin el espacio.
             StartActivityForResult(Intent.CreateChooser(saveIntent, "..."), ACTIVITY_RESULT_SAVE_AS_DIALOG);
+            */
+            // TODO: se lanza una actividad para pedir un nombre de proyecto válido. El resultado se
+            // gestiona en OnActivityResult, asignando un valor a Project.Name y llamando a SaveChanges.
+            Project.Name = "testproject";
+            SaveChanges();
         }
 
         private static readonly int ACTIVITY_RESULT_SAVE_AS_DIALOG = 1;
@@ -149,7 +153,7 @@ namespace Chameleon
         {
             if (requestCode == ACTIVITY_RESULT_SAVE_AS_DIALOG && resultCode == Result.Ok)
             {
-                Project.CompressedFilePath = data.Data.ToString();
+                //Project.Name = ...;
                 SaveChanges();
             }
             else

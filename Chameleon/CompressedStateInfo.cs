@@ -13,12 +13,12 @@ namespace Chameleon
 {
     class CompressedStateInfo
     {
-        public string Path;
+        public string ProjectName;
         public bool UnsavedChanges;
 
         public CompressedStateInfo()
         {
-            Path = null;
+            ProjectName = null;
             UnsavedChanges = false;
         }
     }
