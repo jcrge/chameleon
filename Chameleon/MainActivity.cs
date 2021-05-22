@@ -122,9 +122,7 @@ namespace Chameleon
 
         private void StartProjectActivity()
         {
-            StartActivity(
-                new Intent(this, typeof(ProjectActivity)),
-                ActivityOptions.MakeSceneTransitionAnimation(this).ToBundle());
+            StartActivity(new Intent(this, typeof(ProjectActivity)));
         }
 
         private void ConfirmDiscardSession(Action next)
