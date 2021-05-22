@@ -23,7 +23,7 @@ namespace Chameleon
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class ProjectActivity : AppCompatActivity
     {
-        private enum RecyclerViewMode { Selection, Reorder, Normal }
+        private enum RecyclerViewMode { Selection, Normal }
 
         private Project Project;
         private RecyclerView RecyclerView;
@@ -123,7 +123,7 @@ namespace Chameleon
                     Mode = RecyclerViewMode.Normal;
                     break;
 
-                default:
+                case RecyclerViewMode.Normal:
                     base.OnBackPressed();
                     break;
             }
@@ -186,9 +186,6 @@ namespace Chameleon
                     break;
 
                 case Resource.Id.action_delete:
-                    break;
-
-                case Resource.Id.action_reorder_mode:
                     break;
 
                 case Resource.Id.action_split:

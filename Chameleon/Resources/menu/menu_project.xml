@@ -14,23 +14,18 @@
         android:icon="@android:drawable/ic_menu_delete"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_reorder_mode"
-        android:orderInCategory="3"
-        android:title="@string/action_reorder_mode"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_save"
-        android:orderInCategory="4"
+        android:orderInCategory="3"
         android:title="@string/action_save"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_save_as"
-        android:orderInCategory="5"
+        android:orderInCategory="4"
         android:title="@string/action_save_as"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_close"
-        android:orderInCategory="6"
+        android:orderInCategory="5"
         android:title="@string/action_close"
         app:showAsAction="never" />
 </menu>

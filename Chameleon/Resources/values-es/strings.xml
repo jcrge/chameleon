@@ -20,7 +20,6 @@
     <string name="action_save">Guardar</string>
     <string name="action_save_as">Guardar como...</string>
     <string name="action_split">Dividir...</string>
-    <string name="action_reorder_mode">Modo de reordenación</string>
     <string name="action_delete">Eliminar</string>
     <string name="no_unsaved_changes">No hay nuevos cambios para guardar.</string>
     <string name="changes_saved_successfully">Se han guardado los cambios.</string>

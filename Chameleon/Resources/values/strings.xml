@@ -22,7 +22,6 @@
     <string name="action_save">Save</string>
     <string name="action_save_as">Save as...</string>
     <string name="action_split">Split...</string>
-    <string name="action_reorder_mode">Reorder mode</string>
     <string name="action_delete">Delete</string>
     <string name="no_unsaved_changes">There are no new changes to save.</string>
     <string name="changes_saved_successfully">Your changes have been saved.</string>
