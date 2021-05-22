@@ -148,7 +148,18 @@ namespace Chameleon
 
         private void ConfirmDiscardSession(Action next)
         {
-            if (!RecoverProjectButton.Enabled)
+            bool unsavedChanges;
+            try
+            {
+                Project p = StagingArea.LoadRootDir();
+                unsavedChanges = p.UnsavedChanges;
+            }
+            catch (StagingAreaNotReadyException)
+            {
+                unsavedChanges = false;
+            }
+
+            if (!unsavedChanges)
             {
                 next();
             }

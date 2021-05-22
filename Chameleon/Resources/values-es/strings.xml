@@ -8,8 +8,8 @@
     <string name="action_create_project">Nuevo proyecto...</string>
     <string name="action_open_project">Abrir proyecto...</string>
     <string name="action_recover_project">Entrar en la sesión activa</string>
-    <string name="discard_staging_area_alert_title">Confirmación</string>
-    <string name="discard_staging_area_alert_message">Esta acción comenzará una nueva sesión, perdiéndose cualquier cambio no guardado en la que está actualmente abierta. ¿Estás seguro de que deseas continuar?</string>
+    <string name="discard_staging_area_alert_title">Cambios no guardados</string>
+    <string name="discard_staging_area_alert_message">La sesión actual tiene cambios no guardados, y estos se perderán. ¿Estás seguro de que deseas continuar?</string>
     <string name="error_uncompressing_project_alert_title">Error</string>
     <string name="error_uncompressing_project_alert_message">El archivo seleccionado no es un proyecto Camaleón válido.</string>
     <string name="error_appending_chunk_alert_title">Error</string>
