@@ -30,6 +30,7 @@ namespace Chameleon
         private ProjectViewAdapter Adapter;
         private List<SelectableChunkEntry> Entries;
         private RecyclerViewMode Mode;
+        private IMenu Menu;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -84,8 +85,7 @@ namespace Chameleon
             switch (Mode)
             {
                 case RecyclerViewMode.Selection:
-                    entry.Selected = !entry.Selected;
-                    Adapter.NotifyItemChanged(position);
+                    ToggleSelection(entry, position);
                     break;
             }
         }
@@ -95,14 +95,12 @@ namespace Chameleon
             switch (Mode)
             {
                 case RecyclerViewMode.Selection:
-                    entry.Selected = !entry.Selected;
-                    Adapter.NotifyItemChanged(position);
+                    ToggleSelection(entry, position);
                     break;
 
                 case RecyclerViewMode.Normal:
                     Mode = RecyclerViewMode.Selection;
-                    entry.Selected = true;
-                    Adapter.NotifyItemChanged(position);
+                    ToggleSelection(entry, position);
                     break;
             }
         }
@@ -127,6 +125,21 @@ namespace Chameleon
                     base.OnBackPressed();
                     break;
             }
+        }
+
+        private void ToggleSelection(SelectableChunkEntry entry, int position)
+        {
+            entry.Selected = !entry.Selected;
+            Adapter.NotifyItemChanged(position);
+
+            UpdateMenu(Menu);
+        }
+
+        private void UpdateMenu(IMenu menu)
+        {
+            int selectedCount = Entries.Where(e => e.Selected).Count();
+            menu.FindItem(Resource.Id.action_delete).SetVisible(selectedCount > 0);
+            menu.FindItem(Resource.Id.action_split).SetVisible(selectedCount == 1);
         }
 
         private async void NewChunk()
@@ -160,6 +173,8 @@ namespace Chameleon
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.menu_project, menu);
+            UpdateMenu(menu);
+            Menu = menu;
             return true;
         }
 
