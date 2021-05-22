@@ -100,6 +100,7 @@ namespace Chameleon
             // Número de bytes iniciales de la carga de "data" que deben conformar la carga total de la
             // sección "data" de leftDestPath.
             int leftDataByteCount = (int)((long)f.BytesPerSample * f.NumChannels * f.SampleRate * midpointMsec / 1000);
+            leftDataByteCount -= leftDataByteCount % (f.BytesPerSample * f.NumChannels);
             int rightDataByteCount = f.SampleDataSize - leftDataByteCount;
 
             if (rightDataByteCount <= 0)
