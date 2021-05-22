@@ -19,10 +19,10 @@ namespace Chameleon
         private static readonly int POS_SHORT_JUMP_SECONDS = 2000;
         private static readonly int POS_LONG_JUMP_SECONDS = 5000;
 
-        public Button PlayPauseButton;
-        public Button RewindButton;
-        public Button FastForwardButton;
-        public CheckBox LoopCheckBox;
+        private Button PlayPauseButton;
+        private Button RewindButton;
+        private Button FastForwardButton;
+        private CheckBox LoopCheckBox;
 
         private MediaPlayer Player;
 
@@ -49,6 +49,16 @@ namespace Chameleon
             }
         }
 
+        public int CurrentPositionMsec
+        {
+            get => Player.CurrentPosition;
+        }
+
+        public int DurationMsec
+        {
+            get => Player.Duration;
+        }
+
         public AudioPlayer(Context context) : base(context)
         {
             Initialize();
@@ -64,6 +74,15 @@ namespace Chameleon
             base(context, attrs, defStyle)
         {
             Initialize();
+        }
+
+        public void Pause()
+        {
+            if (Player.IsPlaying)
+            {
+                Player.Pause();
+                PlayPauseButton.Text = Resources.GetText(Resource.String.action_play);
+            }
         }
 
         private void Initialize()
@@ -108,8 +127,7 @@ namespace Chameleon
             }
             else
             {
-                Player.Pause();
-                PlayPauseButton.Text = Resources.GetText(Resource.String.action_play);
+                Pause();
             }
         }
 

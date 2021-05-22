@@ -31,4 +31,8 @@
     <string name="select_project">Touch a project name to select it.</string>
     <string name="confirm_delete_chunks_title">Confirmation</string>
     <string name="confirm_delete_chunks_message">Are you sure you want to delete the selected items? This action cannot be undone.</string>
+    <string name="midpoint_chooser_help">Pause the player where you want to split the selected audio chunk. Then, press the button below to proceed.</string>
+    <string name="error_invalid_midpoint">The selected position can\'t split the chunk into two smaller ones.</string>
+    <string name="midpoint_previewer_left">Left chunk:</string>
+    <string name="midpoint_previewer_right">Right chunk:</string>
 </resources>

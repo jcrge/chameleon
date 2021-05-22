@@ -168,6 +168,16 @@ namespace Chameleon
             alert.Create().Show();
         }
 
+        private void SplitClicked()
+        {
+            string id = Entries.Find(e => e.Selected).Chunk.Id;
+            Intent intent = new Intent();
+            intent.SetComponent(new ComponentName(Application.Context,
+                Java.Lang.Class.FromType(typeof(MidpointChooserActivity)).Name));
+            intent.PutExtra(MidpointChooserActivity.INPUT_CHUNK_ID, id);
+            StartActivityForResult(intent, ACTIVITY_RESULT_SPLIT);
+        }
+
         private async void NewChunk()
         {
             FileResult result = await FilePicker.PickAsync();
@@ -231,6 +241,7 @@ namespace Chameleon
                     break;
 
                 case Resource.Id.action_split:
+                    SplitClicked();
                     break;
 
                 default:
@@ -253,6 +264,7 @@ namespace Chameleon
         }
 
         private static readonly int ACTIVITY_RESULT_SAVE_AS_DIALOG = 1;
+        private static readonly int ACTIVITY_RESULT_SPLIT = 2;
 
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
@@ -260,6 +272,24 @@ namespace Chameleon
             {
                 Project.Name = data.GetStringExtra(ActivityProjectNameChooser.CHOSEN_NAME);
                 SaveChanges();
+            }
+            else if (requestCode == ACTIVITY_RESULT_SPLIT && resultCode == Result.Ok)
+            {
+                Mode = RecyclerViewMode.Normal;
+
+                // Otra instancia de Project ha actualizado el índice, por lo que volvemos
+                // a cargarlo.
+                Project = StagingArea.LoadRootDir();
+
+                string id = data.GetStringExtra(MidpointChooserActivity.OUTPUT_CHUNK_ID);
+                int pos = Entries.FindIndex(e => e.Chunk.Id == id);
+
+                Entries.RemoveAt(pos);
+                Entries.Insert(pos, new SelectableChunkEntry(Project.Index.Chunks[pos]));
+                Adapter.NotifyItemChanged(pos);
+
+                Entries.Insert(pos + 1, new SelectableChunkEntry(Project.Index.Chunks[pos + 1]));
+                Adapter.NotifyItemInserted(pos + 1);
             }
             else
             {

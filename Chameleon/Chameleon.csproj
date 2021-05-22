@@ -69,6 +69,8 @@
     <Compile Include="CompressedStateInfo.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="AudioRecorder.cs" />
+    <Compile Include="MidpointChooserActivity.cs" />
+    <Compile Include="MidpointPreviewerActivity.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="ProjectActivity.cs" />
     <Compile Include="ProjectIndex.cs" />
@@ -153,6 +155,16 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\activity_select_project.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_midpoint_chooser.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_midpoint_previewer.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

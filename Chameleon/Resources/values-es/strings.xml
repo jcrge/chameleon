@@ -29,4 +29,8 @@
     <string name="select_project">Toca un nombre de proyecto para seleccionarlo.</string>
     <string name="confirm_delete_chunks_title">Confirmation</string>
     <string name="confirm_delete_chunks_message">¿Estás seguro de que deseas eliminar los elementos seleccionados? Esta acción no se puede deshacer.</string>
+    <string name="midpoint_chooser_help">Pausa el reproductor donde quieres dividir el segmento de audio seleccionado. A continuación, pulsa el botón de abajo para continuar.</string>
+    <string name="error_invalid_midpoint">La posición seleccionada no puede dividir el segmento de audio en dos más pequeños.</string>
+    <string name="midpoint_previewer_left">Segmento izquierdo:</string>
+    <string name="midpoint_previewer_right">Segmento derecho:</string>
 </resources>

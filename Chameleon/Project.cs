@@ -119,6 +119,35 @@ namespace Chameleon
             IndexUpdated();
         }
 
+        public void ReplaceWithSubchunks(
+            string sourceChunkId, double leftSec, string leftPath, double rightSec, string rightPath)
+        {
+            string leftId = "" + Index.NextId;
+            string rightId = "" + (Index.NextId + 1);
+
+            int sourceChunkPos = Index.Chunks.FindIndex(e => e.Id == sourceChunkId);
+            ChunkEntry sourceChunk = Index.Chunks[sourceChunkPos];
+
+            Index.Chunks.RemoveAt(sourceChunkPos);
+            Index.Chunks.Insert(sourceChunkPos, new ChunkEntry
+            {
+                Id = leftId,
+                DurationSec = leftSec,
+            });
+            Index.Chunks.Insert(sourceChunkPos + 1, new ChunkEntry
+            {
+                Id = rightId,
+                DurationSec = rightSec,
+            });
+            Index.NextId += 2;
+
+            IndexUpdated();
+
+            File.Move(leftPath, Settings.GetPathForChunk(leftId));
+            File.Move(rightPath, Settings.GetPathForChunk(rightId));
+            File.Delete(Settings.GetPathForChunk(sourceChunkId));
+        }
+
         public void SplitChunk(string sourceChunkId, int midpointMsec)
         {
             double midpointSec = midpointMsec / (double)1000;

@@ -22,6 +22,21 @@ namespace Chameleon
             get => Path.Combine(StagingAreaPath, "compressed-state.json");
         }
 
+        public static string SplitOpDir
+        {
+            get => Path.Combine(StagingAreaPath, "split-op");
+        }
+
+        public static string SplitOpLeftFile
+        {
+            get => Path.Combine(SplitOpDir, "left.wav");
+        }
+
+        public static string SplitOpRightFile
+        {
+            get => Path.Combine(SplitOpDir, "right.wav");
+        }
+
         public static string UncompressedProjectPath
         {
             get => Path.Combine(StagingAreaPath, "current-project");
