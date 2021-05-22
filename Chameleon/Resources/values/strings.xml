@@ -29,4 +29,6 @@
     <string name="error_project_already_exists_title">Error</string>
     <string name="error_project_already_exists_message">The specified project name is already in use. Please choose another.</string>
     <string name="select_project">Touch a project name to select it.</string>
+    <string name="confirm_delete_chunks_title">Confirmation</string>
+    <string name="confirm_delete_chunks_message">Are you sure you want to delete the selected items? This action cannot be undone.</string>
 </resources>

@@ -142,6 +142,32 @@ namespace Chameleon
             menu.FindItem(Resource.Id.action_split).SetVisible(selectedCount == 1);
         }
 
+        private void DeleteClicked()
+        {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.SetTitle(GetString(Resource.String.confirm_delete_chunks_title));
+            alert.SetMessage(GetString(Resource.String.confirm_delete_chunks_message));
+            alert.SetPositiveButton(GetString(Android.Resource.String.Ok), (s, e) =>
+            {
+                for (int i = Entries.Count - 1; i >= 0; i--)
+                {
+                    SelectableChunkEntry entry = Entries[i];
+                    if (entry.Selected)
+                    {
+                        Project.DeleteChunk(entry.Chunk.Id);
+                        Entries.RemoveAt(i);
+                        Adapter.NotifyItemRemoved(i);
+                    }
+                }
+
+                Mode = RecyclerViewMode.Normal;
+            });
+            alert.SetNegativeButton(GetString(Android.Resource.String.Cancel), (s, e) =>
+            {
+            });
+            alert.Create().Show();
+        }
+
         private async void NewChunk()
         {
             FileResult result = await FilePicker.PickAsync();
@@ -201,6 +227,7 @@ namespace Chameleon
                     break;
 
                 case Resource.Id.action_delete:
+                    DeleteClicked();
                     break;
 
                 case Resource.Id.action_split:

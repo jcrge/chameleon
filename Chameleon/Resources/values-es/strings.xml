@@ -27,4 +27,6 @@
     <string name="error_project_already_exists_title">Error</string>
     <string name="error_project_already_exists_message">El nombre de proyecto especificado ya está en uso. Por favor, elige otro.</string>
     <string name="select_project">Toca un nombre de proyecto para seleccionarlo.</string>
+    <string name="confirm_delete_chunks_title">Confirmation</string>
+    <string name="confirm_delete_chunks_message">¿Estás seguro de que deseas eliminar los elementos seleccionados? Esta acción no se puede deshacer.</string>
 </resources>
