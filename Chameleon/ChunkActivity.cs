@@ -22,7 +22,6 @@ namespace Chameleon
         public static readonly string INPUT_CHUNK_ID = "input_chunk_id";
         public static readonly string OUTPUT_CHUNK_ID = "output_chunk_id";
 
-        private TextView TopTitle;
         private AudioPlayer ChunkPlayer;
         private AudioPlayer AttemptPlayer;
         private AudioRecorder Recorder;
@@ -49,7 +48,6 @@ namespace Chameleon
             AttemptPlayer = FindViewById<AudioPlayer>(Resource.Id.attempt_player);
             Recorder = FindViewById<AudioRecorder>(Resource.Id.recorder);
             ComparisonButton = FindViewById<Button>(Resource.Id.comparison_button);
-            TopTitle = FindViewById<TextView>(Resource.Id.title);
             NewTitle = FindViewById<EditText>(Resource.Id.new_title);
             NewSubtitles = FindViewById<EditText>(Resource.Id.new_subtitles);
             NewRemarks = FindViewById<EditText>(Resource.Id.new_remarks);
@@ -59,9 +57,6 @@ namespace Chameleon
             string chunkId = Intent.GetStringExtra(INPUT_CHUNK_ID);
             ChunkEntry = Project.Index.Chunks.Find(e => e.Id == chunkId);
 
-            TopTitle.Text = string.IsNullOrEmpty(ChunkEntry.Name)
-                ? GetString(Resource.String.no_title)
-                : ChunkEntry.Name;
             NewTitle.Text = ChunkEntry.Name;
             NewSubtitles.Text = ChunkEntry.Subtitles;
             NewRemarks.Text = ChunkEntry.Remarks;
@@ -82,6 +77,10 @@ namespace Chameleon
                     ComparisonButton.Enabled = true;
                 }
             }
+
+            SupportActionBar.Title = string.IsNullOrEmpty(ChunkEntry.Name)
+                ? GetString(Resource.String.no_title)
+                : ChunkEntry.Name;
         }
 
         private static readonly string ATTEMPT_EXISTS = "attempt_exists";

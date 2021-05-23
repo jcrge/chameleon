@@ -69,6 +69,8 @@ namespace Chameleon
 
             Adapter.ItemClick += (s, e) => EntryClicked(e.Position, Entries[e.Position]);
             Adapter.ItemLongClick += (s, e) => EntryLongClicked(e.Position, Entries[e.Position]);
+
+            SupportActionBar.Title = Project.Name;
         }
 
         private static readonly string STATE_SELECTED_ROWS = "SELECTED_ROWS";

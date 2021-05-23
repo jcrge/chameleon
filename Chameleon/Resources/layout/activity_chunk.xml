@@ -38,32 +38,11 @@
                 android:orientation="vertical"
                 >
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_title"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:textAlignment="center"
-                    android:textSize="18sp"
-                    android:textStyle="italic"
-                    android:lines="1"
-                    android:ellipsize="middle"
-                    android:textColor="#222222"
-                    android:id="@+id/title"
-                    />
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#808080"
-                    android:layout_marginBottom="10dp"
-                    />
                 <Chameleon.AudioPlayer
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/chunk_player"
+                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
