@@ -1,11 +1,15 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
+using AndroidX.Core.App;
+using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
 using Google.Android.Material.FloatingActionButton;
 using System;
@@ -42,7 +46,7 @@ namespace Chameleon
             SetSupportActionBar(toolbar);
 
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += (s, e) => NewChunk();
+            fab.Click += (s, e) => NewChunkClicked();
 
             RecyclerView = FindViewById<RecyclerView>(Resource.Id.chunks);
 
@@ -199,6 +203,32 @@ namespace Chameleon
                 Java.Lang.Class.FromType(typeof(MidpointChooserActivity)).Name));
             intent.PutExtra(MidpointChooserActivity.INPUT_CHUNK_ID, id);
             StartActivityForResult(intent, ACTIVITY_RESULT_SPLIT);
+        }
+
+        private void NewChunkClicked()
+        {
+            if (ContextCompat.CheckSelfPermission(Application.Context, Manifest.Permission.ReadExternalStorage)
+                != (int)Permission.Granted)
+            {
+                ActivityCompat.RequestPermissions(
+                    Platform.CurrentActivity,
+                    new string[] { Manifest.Permission.ReadExternalStorage },
+                    REQUEST_FILE_PICKER);
+            }
+            else
+            {
+                NewChunk();
+            }
+        }
+
+        private static readonly int REQUEST_FILE_PICKER = 1;
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            if (requestCode == REQUEST_FILE_PICKER && grantResults.Length == 1 && grantResults[0] == Permission.Granted)
+            {
+                NewChunk();
+            }
         }
 
         private async void NewChunk()
