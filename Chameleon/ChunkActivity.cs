@@ -117,6 +117,7 @@ namespace Chameleon
                 AttemptPlayer.Pause();
                 ChunkPlayer.ControlsLocked = true;
                 ChunkPlayer.Pause();
+                Recorder.Enabled = false;
 
                 AttemptPlayer.LoopingLocked = true;
                 ChunkPlayer.LoopingLocked = true;
@@ -133,6 +134,7 @@ namespace Chameleon
 
                 AttemptPlayer.ControlsLocked = false;
                 ChunkPlayer.ControlsLocked = false;
+                Recorder.Enabled = true;
 
                 AttemptPlayer.LoopingLocked = false;
                 ChunkPlayer.LoopingLocked = false;
