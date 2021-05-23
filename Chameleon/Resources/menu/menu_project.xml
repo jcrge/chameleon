@@ -23,9 +23,4 @@
         android:orderInCategory="4"
         android:title="@string/action_save_as"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_close"
-        android:orderInCategory="5"
-        android:title="@string/action_close"
-        app:showAsAction="never" />
 </menu>

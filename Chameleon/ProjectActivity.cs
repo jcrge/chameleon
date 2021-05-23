@@ -243,9 +243,6 @@ namespace Chameleon
                     SaveChangesAs();
                     break;
 
-                case Resource.Id.action_close:
-                    break;
-
                 case Resource.Id.action_delete:
                     DeleteClicked();
                     break;
