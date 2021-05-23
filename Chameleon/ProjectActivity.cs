@@ -88,6 +88,11 @@ namespace Chameleon
             {
                 case RecyclerViewMode.Selection:
                     ToggleSelection(entry, position);
+
+                    if (!Entries.Any(e => e.Selected))
+                    {
+                        Mode = RecyclerViewMode.Normal;
+                    }
                     break;
 
                 case RecyclerViewMode.Normal:
