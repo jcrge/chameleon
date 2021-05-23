@@ -5,7 +5,7 @@
         android:id="@+id/action_split"
         android:orderInCategory="1"
         android:title="@string/action_split"
-        android:icon="@android:drawable/ic_menu_crop"
+        android:icon="@android:drawable/ic_menu_edit"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_delete"
