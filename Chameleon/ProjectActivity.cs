@@ -183,6 +183,7 @@ namespace Chameleon
                 }
 
                 Mode = RecyclerViewMode.Normal;
+                UpdateMenu(Menu);
             });
             alert.SetNegativeButton(GetString(Android.Resource.String.Cancel), (s, e) =>
             {
@@ -311,6 +312,8 @@ namespace Chameleon
 
                 Entries.Insert(pos + 1, new SelectableChunkEntry(Project.Index.Chunks[pos + 1]));
                 Adapter.NotifyItemInserted(pos + 1);
+
+                UpdateMenu(Menu);
             }
             else if (requestCode == ACTIVITY_RESULT_VIEW_CHUNK && resultCode == Result.Ok)
             {
