@@ -13,6 +13,10 @@ using System.Text;
 using Xamarin.Essentials;
 using AndroidX.AppCompat.Widget;
 using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
+using AndroidX.Core.App;
+using Android;
+using AndroidX.Core.Content;
+using Android.Content.PM;
 
 namespace Chameleon
 {
@@ -34,6 +38,7 @@ namespace Chameleon
         private ChunkEntry ChunkEntry;
 
         private bool Comparing = false;
+        private bool CanRecord = true;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -81,6 +86,18 @@ namespace Chameleon
             SupportActionBar.Title = string.IsNullOrEmpty(ChunkEntry.Name)
                 ? GetString(Resource.String.no_title)
                 : ChunkEntry.Name;
+
+            if (ContextCompat.CheckSelfPermission(Application.Context, Manifest.Permission.RecordAudio)
+                != (int)Permission.Granted)
+            {
+                CanRecord = false;
+                Recorder.Enabled = false;
+
+                ActivityCompat.RequestPermissions(
+                    Platform.CurrentActivity,
+                    new string[] { Manifest.Permission.RecordAudio },
+                    REQUEST_MIC);
+            }
         }
 
         private static readonly string ATTEMPT_EXISTS = "attempt_exists";
@@ -149,7 +166,7 @@ namespace Chameleon
 
                 AttemptPlayer.ControlsLocked = false;
                 ChunkPlayer.ControlsLocked = false;
-                Recorder.Enabled = true;
+                Recorder.Enabled = CanRecord;
 
                 AttemptPlayer.LoopingLocked = false;
                 ChunkPlayer.LoopingLocked = false;
@@ -188,6 +205,17 @@ namespace Chameleon
             ChunkEntry.Subtitles = NewSubtitles.Text;
             ChunkEntry.Remarks = NewRemarks.Text;
             Project.FlushIndex();
+        }
+
+        private static readonly int REQUEST_MIC = 1;
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            if (requestCode == REQUEST_MIC && grantResults.Length == 1 && grantResults[0] == Permission.Granted)
+            {
+                CanRecord = true;
+                Recorder.Enabled = true;
+            }
         }
     }
 }

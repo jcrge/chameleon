@@ -1,17 +1,22 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Media;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.App;
+using AndroidX.Core.Content;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace Chameleon
 {
@@ -72,30 +77,43 @@ namespace Chameleon
         {
             if (!Recording)
             {
-                Recorder.Reset();
-
-                if (File.Exists(audioDestination))
+                if (ContextCompat.CheckSelfPermission(Application.Context, Manifest.Permission.RecordAudio)
+                    == (int)Permission.Granted)
                 {
-                    File.Delete(audioDestination);
+                    StartRecording();
                 }
-
-                Recorder.SetAudioSource(AudioSource.Mic);
-                Recorder.SetOutputFormat(OutputFormat.Mpeg4);
-                Recorder.SetAudioEncoder(AudioEncoder.Aac);
-                Recorder.SetAudioEncodingBitRate(128000);
-                Recorder.SetAudioSamplingRate(96000);
-                Recorder.SetOutputFile(audioDestination);
-                Recorder.Prepare();
-
-                Text = Resources.GetText(Resource.String.action_stop_recording);
-                Recording = true;
-                RecordingStarted(this, EventArgs.Empty);
-                Recorder.Start();
+                else
+                {
+                    throw new PermissionException("User does not have the RECORD_AUDIO permission");
+                }
             }
             else
             {
                 StopRecording();
             }
+        }
+
+        private void StartRecording()
+        {
+            Recorder.Reset();
+
+            if (File.Exists(audioDestination))
+            {
+                File.Delete(audioDestination);
+            }
+
+            Recorder.SetAudioSource(AudioSource.Mic);
+            Recorder.SetOutputFormat(OutputFormat.Mpeg4);
+            Recorder.SetAudioEncoder(AudioEncoder.Aac);
+            Recorder.SetAudioEncodingBitRate(128000);
+            Recorder.SetAudioSamplingRate(96000);
+            Recorder.SetOutputFile(audioDestination);
+            Recorder.Prepare();
+
+            Text = Resources.GetText(Resource.String.action_stop_recording);
+            Recording = true;
+            RecordingStarted(this, EventArgs.Empty);
+            Recorder.Start();
         }
 
         private void StopRecording()
