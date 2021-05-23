@@ -33,4 +33,11 @@
     <string name="error_invalid_midpoint">La posición seleccionada no puede dividir el segmento de audio en dos más pequeños.</string>
     <string name="midpoint_previewer_left">Segmento izquierdo:</string>
     <string name="midpoint_previewer_right">Segmento derecho:</string>
+    <string name="button_compare">Comparar</string>
+    <string name="enter_title">Nuevo título:</string>
+    <string name="enter_subtitles">Subtítulos:</string>
+    <string name="enter_remarks">Notas:</string>
+    <string name="enter_title_hint">Título</string>
+    <string name="enter_subtitles_hint">Subtítulos</string>
+    <string name="enter_remarks_hint">Notas</string>
 </resources>

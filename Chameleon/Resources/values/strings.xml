@@ -16,7 +16,7 @@
     <string name="error_uncompressing_project_alert_message">The file selected is not a valid Chameleon project.</string>
     <string name="error_appending_chunk_alert_title">Error</string>
     <string name="error_appending_chunk_alert_message">The selected file could not be added to the project. Make sure to select a valid WAV audio file in uncompressed PCM format.</string>
-    <string name="no_title">No title available</string>
+    <string name="no_title">Untitled</string>
     <string name="no_subtitles">No subtitles available</string>
     <string name="action_close">Close</string>
     <string name="action_save">Save</string>
@@ -32,7 +32,14 @@
     <string name="confirm_delete_chunks_title">Confirmation</string>
     <string name="confirm_delete_chunks_message">Are you sure you want to delete the selected items? This action cannot be undone.</string>
     <string name="midpoint_chooser_help">Pause the player where you want to split the selected audio chunk. Then, press the button below to proceed.</string>
+    <string name="button_compare">Compare</string>
     <string name="error_invalid_midpoint">The selected position can\'t split the chunk into two smaller ones.</string>
     <string name="midpoint_previewer_left">Left chunk:</string>
     <string name="midpoint_previewer_right">Right chunk:</string>
+    <string name="enter_title">New title:</string>
+    <string name="enter_subtitles">Subtitles:</string>
+    <string name="enter_remarks">Remarks:</string>
+    <string name="enter_title_hint">Title</string>
+    <string name="enter_subtitles_hint">Subtitles</string>
+    <string name="enter_remarks_hint">Remarks</string>
 </resources>

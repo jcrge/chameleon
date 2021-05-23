@@ -17,6 +17,11 @@ namespace Chameleon
     {
         public static readonly string StagingAreaPath = FileSystem.AppDataDirectory;
 
+        public static string LastAttemptPath
+        {
+            get => Path.Combine(StagingAreaPath, "last-attempt");
+        }
+
         public static string CompressedStatePath
         {
             get => Path.Combine(StagingAreaPath, "compressed-state.json");

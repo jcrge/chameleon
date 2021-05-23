@@ -87,6 +87,14 @@ namespace Chameleon
                 case RecyclerViewMode.Selection:
                     ToggleSelection(entry, position);
                     break;
+
+                case RecyclerViewMode.Normal:
+                    Intent intent = new Intent();
+                    intent.SetComponent(new ComponentName(Application.Context,
+                        Java.Lang.Class.FromType(typeof(ChunkActivity)).Name));
+                    intent.PutExtra(ChunkActivity.INPUT_CHUNK_ID, entry.Chunk.Id);
+                    StartActivityForResult(intent, ACTIVITY_RESULT_VIEW_CHUNK);
+                    break;
             }
         }
 
@@ -265,6 +273,7 @@ namespace Chameleon
 
         private static readonly int ACTIVITY_RESULT_SAVE_AS_DIALOG = 1;
         private static readonly int ACTIVITY_RESULT_SPLIT = 2;
+        private static readonly int ACTIVITY_RESULT_VIEW_CHUNK = 3;
 
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
@@ -290,6 +299,18 @@ namespace Chameleon
 
                 Entries.Insert(pos + 1, new SelectableChunkEntry(Project.Index.Chunks[pos + 1]));
                 Adapter.NotifyItemInserted(pos + 1);
+            }
+            else if (requestCode == ACTIVITY_RESULT_VIEW_CHUNK && resultCode == Result.Ok)
+            {
+                // Otra instancia de Project ha actualizado el índice, por lo que volvemos
+                // a cargarlo.
+                Project = StagingArea.LoadRootDir();
+
+                string id = data.GetStringExtra(ChunkActivity.OUTPUT_CHUNK_ID);
+                int pos = Entries.FindIndex(e => e.Chunk.Id == id);
+
+                Entries[pos] = new SelectableChunkEntry(Project.Index.Chunks[pos]);
+                Adapter.NotifyItemChanged(pos);
             }
             else
             {

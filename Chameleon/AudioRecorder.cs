@@ -37,6 +37,8 @@ namespace Chameleon
         public delegate void DRecordingReceived(string outputFile);
         public event DRecordingReceived RecordingReceived;
 
+        public event EventHandler RecordingStarted;
+
         public AudioRecorder(Context context) : base(context)
         {
             Initialize();
@@ -80,6 +82,7 @@ namespace Chameleon
 
                 Text = Resources.GetText(Resource.String.action_stop_recording);
                 Recording = true;
+                RecordingStarted(this, EventArgs.Empty);
                 Recorder.Start();
             }
             else
@@ -90,9 +93,9 @@ namespace Chameleon
 
         private void StopRecording()
         {
+            Recorder.Stop();
             Text = Resources.GetText(Resource.String.action_start_recording);
             Recording = false;
-            Recorder.Stop();
 
             RecordingReceived(AudioDestination);
         }

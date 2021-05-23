@@ -34,11 +34,8 @@ namespace Chameleon
             {
                 PrepareToStart();
 
-                PlayPauseButton.Enabled = value != null;
-                RewindButton.Enabled = value != null;
-                FastForwardButton.Enabled = value != null;
-
                 audioSource = value;
+                UpdateControls();
                 if (audioSource != null)
                 {
                     Player.Reset();
@@ -47,6 +44,13 @@ namespace Chameleon
                     Player.Looping = LoopCheckBox.Checked;
                 }
             }
+        }
+
+        private void UpdateControls()
+        {
+            PlayPauseButton.Enabled = audioSource != null && !controlsLocked;
+            RewindButton.Enabled = audioSource != null && !controlsLocked;
+            FastForwardButton.Enabled = audioSource != null && !controlsLocked;
         }
 
         public int CurrentPositionMsec
@@ -58,6 +62,36 @@ namespace Chameleon
         {
             get => Player.Duration;
         }
+
+        private bool loopingLocked;
+        public bool LoopingLocked
+        {
+            get => loopingLocked;
+            set
+            {
+                loopingLocked = value;
+                LoopCheckBox.Enabled = !value;
+                UpdateLoopingValue();
+            }
+        }
+
+        private bool controlsLocked;
+        public bool ControlsLocked
+        {
+            get => controlsLocked;
+            set
+            {
+                controlsLocked = value;
+                UpdateControls();
+            }
+        }
+
+        private void UpdateLoopingValue()
+        {
+            Player.Looping = LoopCheckBox.Enabled && LoopCheckBox.Checked;
+        }
+
+        public event EventHandler PlaybackStopped;
 
         public AudioPlayer(Context context) : base(context)
         {
@@ -85,6 +119,15 @@ namespace Chameleon
             }
         }
 
+        public void Play()
+        {
+            if (!Player.IsPlaying)
+            {
+                Player.Start();
+                PlayPauseButton.Text = Resources.GetText(Resource.String.action_pause);
+            }
+        }
+
         private void Initialize()
         {
             LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
@@ -104,6 +147,7 @@ namespace Chameleon
                 if (!Player.Looping)
                 {
                     PrepareToStart();
+                    PlaybackStopped?.Invoke(this, EventArgs.Empty);
                 }
             };
 
@@ -112,18 +156,19 @@ namespace Chameleon
             RewindButton.LongClick += (s, e) => Player.SeekTo(Player.CurrentPosition - POS_LONG_JUMP_SECONDS);
             FastForwardButton.Click += (s, e) => Player.SeekTo(Player.CurrentPosition + POS_SHORT_JUMP_SECONDS);
             FastForwardButton.LongClick += (s, e) => Player.SeekTo(Player.CurrentPosition + POS_LONG_JUMP_SECONDS);
-            LoopCheckBox.CheckedChange += (s, e) => Player.Looping = LoopCheckBox.Checked;
+            LoopCheckBox.CheckedChange += (s, e) => UpdateLoopingValue();
 
             // AudioSource se debe establecer a null explícitamente para desactivar la interfaz.
             AudioSource = null;
+
+            loopingLocked = false;
         }
 
         private void PlayPauseClicked(object sender, EventArgs e)
         {
             if (!Player.IsPlaying)
             {
-                Player.Start();
-                PlayPauseButton.Text = Resources.GetText(Resource.String.action_pause);
+                Play();
             }
             else
             {

@@ -66,6 +66,7 @@
     <Compile Include="ActivityProjectNameChooser.cs" />
     <Compile Include="ActivitySelectProject.cs" />
     <Compile Include="AudioPlayer.cs" />
+    <Compile Include="ChunkActivity.cs" />
     <Compile Include="CompressedStateInfo.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="AudioRecorder.cs" />
@@ -165,6 +166,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\activity_midpoint_previewer.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_chunk.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
