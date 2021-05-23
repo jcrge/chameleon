@@ -148,46 +148,6 @@ namespace Chameleon
             File.Delete(Settings.GetPathForChunk(sourceChunkId));
         }
 
-        public void SplitChunk(string sourceChunkId, int midpointMsec)
-        {
-            double midpointSec = midpointMsec / (double)1000;
-            string leftId = "" + Index.NextId;
-            string rightId = "" + (Index.NextId + 1);
-
-            double sourceChunkDurationSec;
-            using (PcmWavView pcmWavView = new PcmWavView(Settings.GetPathForChunk(sourceChunkId)))
-            {
-                sourceChunkDurationSec = pcmWavView.DurationSec;
-                WAVEdition.Split(
-                    pcmWavView,
-                    midpointMsec,
-                    Settings.GetPathForChunk(leftId),
-                    Settings.GetPathForChunk(rightId));
-            }
-
-            int sourceChunkPos = Index.Chunks.FindIndex(e => e.Id == sourceChunkId);
-            ChunkEntry sourceChunk = Index.Chunks[sourceChunkPos];
-
-            Index.Chunks.RemoveAt(sourceChunkPos);
-            Index.Chunks.Insert(sourceChunkPos, new ChunkEntry
-            {
-                Id = leftId,
-                Name = $"({sourceChunk.Name ?? "..."})[:{midpointMsec}ms]",
-                DurationSec = midpointSec,
-            });
-            Index.Chunks.Insert(sourceChunkPos + 1, new ChunkEntry
-            {
-                Id = rightId,
-                Name = $"({sourceChunk.Name ?? "..."})[{midpointMsec}ms:]",
-                DurationSec = sourceChunkDurationSec - midpointSec,
-            });
-            Index.NextId += 2;
-
-            IndexUpdated();
-
-            File.Delete(Settings.GetPathForChunk(sourceChunkId));
-        }
-
         public void DeleteChunk(string id)
         {
             Index.Chunks.RemoveAt(Index.Chunks.FindIndex(e => e.Id == id));
