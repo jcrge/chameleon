@@ -73,6 +73,22 @@ namespace Chameleon
 
             ComparisonButton.Click += (s, e) => ComparisonButtonClicked();
             ComparisonButton.Enabled = false;
+
+            if (savedInstanceState != null)
+            {
+                if (savedInstanceState.GetBoolean(ATTEMPT_EXISTS))
+                {
+                    AttemptPlayer.AudioSource = Settings.LastAttemptPath;
+                    ComparisonButton.Enabled = true;
+                }
+            }
+        }
+
+        private static readonly string ATTEMPT_EXISTS = "attempt_exists";
+
+        protected override void OnSaveInstanceState(Bundle outState)
+        {
+            outState.PutBoolean(ATTEMPT_EXISTS, AttemptPlayer.AudioSource != null);
         }
 
         private void RecordingStarted()
