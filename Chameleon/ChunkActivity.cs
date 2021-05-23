@@ -86,10 +86,7 @@ namespace Chameleon
 
         private void RecordingReceived()
         {
-            if (AttemptPlayer.AudioSource == null)
-            {
-                AttemptPlayer.AudioSource = Settings.LastAttemptPath;
-            }
+            AttemptPlayer.AudioSource = Settings.LastAttemptPath;
 
             ChunkPlayer.ControlsLocked = false;
             AttemptPlayer.ControlsLocked = false;

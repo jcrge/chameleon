@@ -8,6 +8,7 @@ using Android.Views;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,12 @@ namespace Chameleon
             if (!Recording)
             {
                 Recorder.Reset();
+
+                if (File.Exists(audioDestination))
+                {
+                    File.Delete(audioDestination);
+                }
+
                 Recorder.SetAudioSource(AudioSource.Mic);
                 Recorder.SetOutputFormat(OutputFormat.Mpeg4);
                 Recorder.SetAudioEncoder(AudioEncoder.Aac);
@@ -97,6 +104,7 @@ namespace Chameleon
             Text = Resources.GetText(Resource.String.action_start_recording);
             Recording = false;
 
+            bool testdebug = File.Exists(audioDestination);
             RecordingReceived(AudioDestination);
         }
 
