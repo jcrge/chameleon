@@ -70,7 +70,7 @@ namespace Chameleon
             Adapter.ItemClick += (s, e) => EntryClicked(e.Position, Entries[e.Position]);
             Adapter.ItemLongClick += (s, e) => EntryLongClicked(e.Position, Entries[e.Position]);
 
-            SupportActionBar.Title = Project.Name;
+            UpdateTitle();
         }
 
         private static readonly string STATE_SELECTED_ROWS = "SELECTED_ROWS";
@@ -80,6 +80,13 @@ namespace Chameleon
             base.OnSaveInstanceState(outState);
             outState.PutBooleanArray(STATE_SELECTED_ROWS, Entries.Select(e => e.Selected).ToArray());
             outState.PutInt(STATE_RECYCLER_VIEW_MODE, (int)Mode);
+        }
+
+        private void UpdateTitle()
+        {
+            SupportActionBar.Title = string.IsNullOrEmpty(Project.Name)
+                ? GetString(Android.Resource.String.Untitled)
+                : Project.Name;
         }
 
         private void EntryClicked(int position, SelectableChunkEntry entry)
@@ -267,6 +274,7 @@ namespace Chameleon
         {
             Project.UpdateCompressedFile();
             Toast.MakeText(this, Resource.String.changes_saved_successfully, ToastLength.Long).Show();
+            UpdateTitle();
         }
 
         private void SaveChangesAs()
