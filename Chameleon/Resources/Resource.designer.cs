@@ -4743,40 +4743,43 @@ namespace Chameleon
 			public const int midpoint_previewer_right = 2131624012;
 			
 			// aapt resource value: 0x7F0E004D
-			public const int mtrl_chip_close_icon_content_description = 2131624013;
+			public const int midpoint_previewer_title = 2131624013;
 			
 			// aapt resource value: 0x7F0E004E
-			public const int no_subtitles = 2131624014;
+			public const int mtrl_chip_close_icon_content_description = 2131624014;
 			
 			// aapt resource value: 0x7F0E004F
-			public const int no_title = 2131624015;
+			public const int no_subtitles = 2131624015;
 			
 			// aapt resource value: 0x7F0E0050
-			public const int no_unsaved_changes = 2131624016;
+			public const int no_title = 2131624016;
 			
 			// aapt resource value: 0x7F0E0051
-			public const int password_toggle_content_description = 2131624017;
+			public const int no_unsaved_changes = 2131624017;
 			
 			// aapt resource value: 0x7F0E0052
-			public const int path_password_eye = 2131624018;
+			public const int password_toggle_content_description = 2131624018;
 			
 			// aapt resource value: 0x7F0E0053
-			public const int path_password_eye_mask_strike_through = 2131624019;
+			public const int path_password_eye = 2131624019;
 			
 			// aapt resource value: 0x7F0E0054
-			public const int path_password_eye_mask_visible = 2131624020;
+			public const int path_password_eye_mask_strike_through = 2131624020;
 			
 			// aapt resource value: 0x7F0E0055
-			public const int path_password_strike_through = 2131624021;
+			public const int path_password_eye_mask_visible = 2131624021;
 			
 			// aapt resource value: 0x7F0E0056
-			public const int search_menu_title = 2131624022;
+			public const int path_password_strike_through = 2131624022;
 			
 			// aapt resource value: 0x7F0E0057
-			public const int select_project = 2131624023;
+			public const int search_menu_title = 2131624023;
 			
 			// aapt resource value: 0x7F0E0058
-			public const int status_bar_notification_info_overflow = 2131624024;
+			public const int select_project = 2131624024;
+			
+			// aapt resource value: 0x7F0E0059
+			public const int status_bar_notification_info_overflow = 2131624025;
 			
 			static String()
 			{

@@ -42,4 +42,5 @@
     <string name="enter_title_hint">Title</string>
     <string name="enter_subtitles_hint">Subtitles</string>
     <string name="enter_remarks_hint">Remarks</string>
+    <string name="midpoint_previewer_title">Confirm split operation</string>
 </resources>

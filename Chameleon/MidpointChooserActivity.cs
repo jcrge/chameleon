@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Xamarin.Essentials;
+using AndroidX.AppCompat.Widget;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Chameleon
 {
@@ -35,6 +37,9 @@ namespace Chameleon
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_midpoint_chooser);
 
+            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
+            SetSupportActionBar(toolbar);
+
             OkButton = FindViewById<Button>(Resource.Id.ok_button);
             AudioPlayer = FindViewById<AudioPlayer>(Resource.Id.player);
 
@@ -44,6 +49,8 @@ namespace Chameleon
             Project = StagingArea.LoadRootDir();
             PcmWavView = new PcmWavView(Settings.GetPathForChunk(ChunkId));
             AudioPlayer.AudioSource = Settings.GetPathForChunk(ChunkId);
+
+            SupportActionBar.Title = Project.Index.Chunks.Find(e => e.Id == ChunkId).Name;
         }
 
         private void OkClicked()

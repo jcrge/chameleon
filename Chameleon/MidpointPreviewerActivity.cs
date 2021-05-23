@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Xamarin.Essentials;
+using AndroidX.AppCompat.Widget;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Chameleon
 {
@@ -27,6 +29,9 @@ namespace Chameleon
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_midpoint_previewer);
 
+            Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
+            SetSupportActionBar(toolbar);
+
             OkButton = FindViewById<Button>(Resource.Id.ok_button);
             LeftPlayer = FindViewById<AudioPlayer>(Resource.Id.left_player);
             RightPlayer = FindViewById<AudioPlayer>(Resource.Id.right_player);
@@ -35,6 +40,8 @@ namespace Chameleon
 
             LeftPlayer.AudioSource = Settings.SplitOpLeftFile;
             RightPlayer.AudioSource = Settings.SplitOpRightFile;
+
+            SupportActionBar.Title = GetString(Resource.String.midpoint_previewer_title);
         }
 
         private void OkClicked()
