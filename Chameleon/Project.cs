@@ -103,10 +103,6 @@ namespace Chameleon
             File.Copy(path, Settings.GetPathForChunk(id));
 
             string name = Path.GetFileNameWithoutExtension(path);
-            if (name.Length > 15)
-            {
-                name = name.Substring(0, 15) + "...";
-            }
 
             Index.Chunks.Add(new ChunkEntry
             {
